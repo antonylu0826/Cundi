@@ -27,7 +27,7 @@ public class Updater : ModuleUpdater
 
         if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "User") == null)
         {
-            string defaultPassword = "Admin123";
+            string defaultPassword = "User123";
             _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "User", defaultPassword, (user) =>
             {
                 user.Roles.Add(defaultRole);
@@ -73,6 +73,9 @@ public class Updater : ModuleUpdater
             defaultRole.Name = "Default";
 
             defaultRole.AddObjectPermissionFromLambda<ApplicationUser>(SecurityOperations.Read, cm => cm.Oid == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
+            // Grant Write permission ONLY to the Photo property
+            defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "Photo", cm => cm.Oid == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
+
             defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
             defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "ChangePasswordOnFirstLogon", cm => cm.Oid == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
             defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "StoredPassword", cm => cm.Oid == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);

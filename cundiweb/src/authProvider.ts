@@ -16,6 +16,31 @@ export const authProvider: AuthProvider = {
       if (response.ok) {
         const token = await response.text();
         localStorage.setItem(TOKEN_KEY, token);
+
+        // Fetch user details including Photo
+        try {
+          const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/odata/ApplicationUser?$filter=UserName eq '${username}'&$top=1`, {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
+          if (userResponse.ok) {
+            const data = await userResponse.json();
+            if (data.value && data.value.length > 0) {
+              const user = data.value[0];
+              if (user.Photo) {
+                localStorage.setItem("user_photo", user.Photo);
+              } else {
+                localStorage.removeItem("user_photo");
+              }
+              localStorage.setItem("user_name", user.DisplayName || user.UserName);
+              localStorage.setItem("user_id", user.Oid);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch user details", error);
+        }
+
         return {
           success: true,
           redirectTo: "/",
@@ -41,6 +66,9 @@ export const authProvider: AuthProvider = {
   },
   logout: async () => {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem("user_photo");
+    localStorage.removeItem("user_name");
+    localStorage.removeItem("user_id");
     return {
       success: true,
       redirectTo: "/login",
@@ -62,11 +90,15 @@ export const authProvider: AuthProvider = {
   getPermissions: async () => null,
   getIdentity: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
+    const photo = localStorage.getItem("user_photo");
+    const name = localStorage.getItem("user_name") || "Admin";
+    const id = localStorage.getItem("user_id");
+
     if (token) {
       return {
-        id: 1,
-        name: "Admin",
-        avatar: "https://i.pravatar.cc/150",
+        id: id || "1",
+        name: name,
+        avatar: photo ? `data:image/png;base64,${photo}` : "https://i.pravatar.cc/150",
       };
     }
     return null;

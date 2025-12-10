@@ -28,3 +28,13 @@ export enum DemoObjectEnum {
 
 
 
+export interface IApplicationUser {
+    Oid: string;
+    UserName: string;
+    DisplayName: string;
+    Email: string;
+    Photo?: string;
+    IsActive: boolean;
+    AccessFailedCount: number;
+    LockoutEnd?: string;
+}

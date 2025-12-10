@@ -12,6 +12,7 @@ import {
 import {
   DashboardOutlined,
   AppstoreOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 
 import routerProvider, {
@@ -35,6 +36,12 @@ import {
   DemoObjectEdit,
   DemoObjectShow,
 } from "./pages/demo-objects";
+
+import {
+  ApplicationUserList,
+  ApplicationUserCreate,
+  ApplicationUserEdit,
+} from "./pages/application-users";
 
 import { Header } from "./components/header";
 import { ColorModeContextProvider, useColorMode } from "./contexts/color-mode";
@@ -79,6 +86,18 @@ const InnerApp: React.FC = () => {
               },
 
               {
+                name: "ApplicationUser",
+                list: "/ApplicationUsers",
+                create: "/ApplicationUsers/create",
+                edit: "/ApplicationUsers/edit/:id",
+                meta: {
+                  label: "Users",
+                  icon: <UserOutlined />,
+                  parent: "Settings",
+                },
+              },
+
+              {
                 name: "DemoDetail",
                 list: "/DemoDetails",
                 meta: {
@@ -111,6 +130,12 @@ const InnerApp: React.FC = () => {
                   <Route path="create" element={<DemoObjectCreate />} />
                   <Route path="edit/:id" element={<DemoObjectEdit />} />
                   <Route path="show/:id" element={<DemoObjectShow />} />
+                </Route>
+
+                <Route path="/ApplicationUsers">
+                  <Route index element={<ApplicationUserList />} />
+                  <Route path="create" element={<ApplicationUserCreate />} />
+                  <Route path="edit/:id" element={<ApplicationUserEdit />} />
                 </Route>
 
               </Route>

@@ -20,7 +20,7 @@ export const SharedList = <T extends BaseRecord = BaseRecord>({
     searchFields,
 }: SharedListProps<T>) => {
     // @ts-ignore
-    const { tableProps, searchFormProps, tableQueryResult, setFilters } = useTable<T, HttpError, { search: string }>({
+    const { tableProps, searchFormProps, tableQueryResult, queryResult, setFilters } = useTable<T, HttpError, { search: string }>({
         resource,
         syncWithLocation: true,
         onSearch: (params) => {
@@ -153,7 +153,7 @@ export const SharedList = <T extends BaseRecord = BaseRecord>({
                     </Form.Item>
                 </Form>
                 <Space>
-                    <Button icon={<ReloadOutlined />} onClick={() => tableQueryResult.refetch()}>Refresh</Button>
+                    <Button icon={<ReloadOutlined />} onClick={() => (tableQueryResult || queryResult)?.refetch()}>Refresh</Button>
                     <Popover content={content} title="Columns" trigger="click" placement="bottomRight">
                         <Button icon={<SettingOutlined />}>Columns</Button>
                     </Popover>

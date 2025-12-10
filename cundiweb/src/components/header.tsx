@@ -1,7 +1,10 @@
-import { useLogout, useGetIdentity } from "@refinedev/core";
-import { Layout, Button, Space, Typography, Avatar, theme, Dropdown, MenuProps } from "antd";
-import { LogoutOutlined, UserOutlined, DownOutlined, SkinOutlined, SunOutlined, MoonOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { useLogout, useGetIdentity, useInvalidate } from "@refinedev/core";
+import { Layout, Button, Space, Typography, Avatar, theme, Dropdown, MenuProps, Modal, Form, Input, message } from "antd";
+import { LogoutOutlined, UserOutlined, DownOutlined, SkinOutlined, SunOutlined, MoonOutlined, CameraOutlined, LockOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useColorMode } from "../contexts/color-mode";
+import { Base64Upload } from "./Base64Upload";
+import { TOKEN_KEY } from "../authProvider";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -11,6 +14,86 @@ export const Header: React.FC = () => {
     const { data: user } = useGetIdentity();
     const { mode, setMode } = useColorMode();
     const { token } = useToken();
+    const invalidate = useInvalidate();
+
+    // Photo Modal State
+    const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+    const [isPhotoLoading, setIsPhotoLoading] = useState(false);
+    const [photoForm] = Form.useForm();
+
+    // Password Modal State
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+    const [passwordForm] = Form.useForm();
+
+    const handlePhotoSubmit = async (values: { Photo: string }) => {
+        if (!user?.id) return;
+        setIsPhotoLoading(true);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/odata/ApplicationUser(${user.id})`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
+                },
+                body: JSON.stringify({ Photo: values.Photo })
+            });
+
+            if (response.ok) {
+                message.success("Photo updated successfully");
+                localStorage.setItem("user_photo", values.Photo || "");
+                invalidate({ resource: "users", invalidates: ["all"] }); // Trigger refresh if needed, but manual LS update works for getIdentity
+                window.location.reload(); // Simple reload to refresh getIdentity if hooks don't pick up LS change immediately
+            } else {
+                message.error("Failed to update photo");
+            }
+        } catch (error) {
+            message.error("Network error");
+        } finally {
+            setIsPhotoLoading(false);
+            setIsPhotoModalOpen(false);
+        }
+    };
+
+    const generatePassword = () => {
+        const length = 12;
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+        let retVal = "";
+        for (let i = 0, n = charset.length; i < length; ++i) {
+            retVal += charset.charAt(Math.floor(Math.random() * n));
+        }
+        passwordForm.setFieldsValue({ password: retVal });
+    };
+
+    const handlePasswordSubmit = async (values: { password: string }) => {
+        if (!user?.id) return;
+        setIsPasswordLoading(true);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/User/ResetPassword`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
+                },
+                body: JSON.stringify({
+                    userId: user.id,
+                    newPassword: values.password
+                })
+            });
+
+            if (response.ok) {
+                message.success("Password changed successfully");
+                setIsPasswordModalOpen(false);
+                logout(); // Logout after password change for security
+            } else {
+                message.error("Failed to change password");
+            }
+        } catch (error) {
+            message.error("Network error");
+        } finally {
+            setIsPasswordLoading(false);
+        }
+    };
 
     const menuItems: MenuProps["items"] = [
         {
@@ -18,7 +101,7 @@ export const Header: React.FC = () => {
             label: (
                 <Space direction="vertical" size={0}>
                     <Text strong>{user?.name}</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>Admin</Text>
+                    {/* <Text type="secondary" style={{ fontSize: 12 }}>Admin</Text> */}
                 </Space>
             ),
             icon: <UserOutlined />,
@@ -29,11 +112,38 @@ export const Header: React.FC = () => {
             type: "divider",
         },
         {
+            key: "change-photo",
+            label: "Change Photo",
+            icon: <CameraOutlined />,
+            onClick: () => {
+                photoForm.setFieldsValue({ Photo: user?.avatar?.replace("data:image/png;base64,", "") });
+                setIsPhotoModalOpen(true);
+            },
+        },
+        {
+            key: "change-password",
+            label: "Change Password",
+            icon: <LockOutlined />,
+            onClick: () => {
+                passwordForm.resetFields();
+                setIsPasswordModalOpen(true);
+            },
+        },
+        {
+            type: "divider",
+        },
+        {
             key: "theme",
             label: mode === "light" ? "Dark Theme" : "Light Theme",
             icon: mode === "light" ? <MoonOutlined /> : <SunOutlined />,
             onClick: () => setMode(mode === "light" ? "dark" : "light"),
         },
+        {
+            key: "logout",
+            label: "Logout",
+            icon: <LogoutOutlined />,
+            onClick: () => logout(),
+        }
     ];
 
     return (
@@ -61,6 +171,44 @@ export const Header: React.FC = () => {
                     </Button>
                 </Dropdown>
             </Space>
+
+            {/* Photo Modal */}
+            <Modal
+                title="Change Photo"
+                open={isPhotoModalOpen}
+                onCancel={() => setIsPhotoModalOpen(false)}
+                onOk={() => photoForm.submit()}
+                confirmLoading={isPhotoLoading}
+            >
+                <Form form={photoForm} onFinish={handlePhotoSubmit} layout="vertical">
+                    <Form.Item name="Photo" label="Upload Photo">
+                        <Base64Upload />
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            {/* Password Modal */}
+            <Modal
+                title="Change Password"
+                open={isPasswordModalOpen}
+                onCancel={() => setIsPasswordModalOpen(false)}
+                onOk={() => passwordForm.submit()}
+                confirmLoading={isPasswordLoading}
+            >
+                <Form form={passwordForm} onFinish={handlePasswordSubmit} layout="vertical">
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                        <Form.Item
+                            name="password"
+                            label="New Password"
+                            style={{ flex: 1, marginBottom: 0 }}
+                            rules={[{ required: true, message: 'Please input the new password!' }]}
+                        >
+                            <Input.Password placeholder="Enter new password" />
+                        </Form.Item>
+                        <Button icon={<ThunderboltOutlined />} onClick={generatePassword} />
+                    </div>
+                </Form>
+            </Modal>
         </Layout.Header>
     );
 };
