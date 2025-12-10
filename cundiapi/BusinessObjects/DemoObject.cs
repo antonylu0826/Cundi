@@ -54,7 +54,6 @@ public class DemoObject : BaseObject
         set { SetPropertyValue<decimal>(nameof(DecimalValue), ref _DecimalValue, value); }
     }
 
-    private byte[] _ImageValue;
     [Delayed(true)]
     public byte[] ImageValue
     {

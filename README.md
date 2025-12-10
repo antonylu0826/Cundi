@@ -1,38 +1,68 @@
-# Cundi Project
+# Cundi
 
-此專案包含 Cundi 系統的前後端程式碼。
+Cundi is a modern full-stack application combining a robust .NET backend with a responsive React frontend.
 
-## 目錄結構
+![Dashboard](./web.png)
 
-- `cundiapi/`: 後端 Web API 專案 (DevExpress XAF, ASP.NET Core)
-  - 使用 .NET 啟動
-- `cundiweb/`: 前端 Web 應用程式 (React, Vite, Refine)
-  - 使用 Node.js/npm 啟動
+## Overview
 
-## 快速開始
+This project demonstrates a Headless CMS architecture using **DevExpress XAF** for the backend API and **Refine** for the frontend UI. It features a complete authentication flow across both layers and reusable components for rapid development. For detailed development guidelines, best practices, and architecture details, please refer to the [Development Guide](./Development_Guide.md).
 
-### 後端 (cundiapi)
+## Technology Stack
 
-1. 進入目錄：
-   ```bash
-   cd cundiapi
-   ```
-2. 還原套件並執行：
-   ```bash
-   dotnet restore
-   dotnet run
-   ```
-   預設網址為 `http://localhost:5000` (或參考 `Properties/launchSettings.json`)
+### Backend (`cundiapi`)
+-   **Framework**: .NET 6 / 8
+-   **Core Library**: DevExpress XAF (Headless Web API)
+-   **ORM**: XPO (eXpress Persistent Objects)
+-   **API Protocol**: OData v4
+-   **Features**:
+    -   JWT Authentication
+    -   Integrated Security System
+    -   Swagger UI for API documentation
 
-### 前端 (cundiweb)
+### Frontend (`cundiweb`)
+-   **Framework**: React 18
+-   **Build Tool**: Vite
+-   **Metasystem**: [Refine](https://refine.dev/)
+-   **UI Library**: Ant Design
+-   **Features**:
+    -   **SharedList**: A powerful, reusable list component with built-in search, sorting, and column management.
+    -   **SharedDetailList**: Specialized component for Master-Detail relationships.
+    -   Role-based Access Control (RBAC).
 
-1. 進入目錄：
-   ```bash
-   cd cundiweb
-   ```
-2. 安裝依賴並啟動開發伺服器：
-   ```bash
-   npm install
-   npm run dev
-   ```
-   預設網址為 `http://localhost:5173`
+## Getting Started
+
+### Prerequisites
+-   .NET SDK (6.0 or later)
+-   Node.js (LTS version recommended)
+
+### 1. Start the Backend
+
+ Navigate to the backend directory and run the application:
+
+```bash
+cd cundiapi
+dotnet restore
+dotnet run
+```
+
+The API will be available at `http://localhost:5000` (or `https://localhost:5001`).
+*Note: Ensure the backend is running before starting the frontend.*
+
+### 2. Start the Frontend
+
+Navigate to the frontend directory, install dependencies, and start the development server:
+
+```bash
+cd cundiweb
+npm install
+npm run dev
+```
+
+The application will launch at `http://localhost:5173`.
+
+## Key Features
+
+-   **DemoObject CRUD**: A fully functional example resource demonstrating Create, Read, Update, and Delete operations.
+-   **Authentication**: Secure login utilizing JWT tokens issued by the backend.
+-   **Clean Architecture**: Separation of concerns between API definitions and UI logic.
