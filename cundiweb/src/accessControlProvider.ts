@@ -2,10 +2,10 @@ import { AccessControlProvider } from "@refinedev/core";
 
 export const accessControlProvider: AccessControlProvider = {
     can: async ({ resource, action }) => {
-        const roles = JSON.parse(localStorage.getItem("user_roles") || "[]");
+        const isAdmin = localStorage.getItem("user_is_admin") === "true";
 
-        // Restrict access to "ApplicationUser" and "Settings" resources to Administrators only
-        if ((resource === "ApplicationUser" || resource === "Settings") && !roles.includes("Administrators")) {
+        // Restrict access to "ApplicationUser", "PermissionPolicyRole" and "Settings" resources to Administrators only
+        if ((resource === "ApplicationUser" || resource === "PermissionPolicyRole" || resource === "Settings") && !isAdmin) {
             return {
                 can: false,
                 reason: "Only Administrators can access Settings",

@@ -64,5 +64,9 @@ The application will launch at `http://localhost:5173`.
 ## Key Features
 
 -   **DemoObject CRUD**: A fully functional example resource demonstrating Create, Read, Update, and Delete operations.
+-   **User Management & Role Assignment**:
+    -   Administrators can manage Application Users and Roles.
+    -   Support for assigning multiple Roles directly from the User Edit page.
+    -   Secure password reset and complex password generation features.
 -   **Authentication**: Secure login utilizing JWT tokens issued by the backend.
 -   **Clean Architecture**: Separation of concerns between API definitions and UI logic.

@@ -64,5 +64,9 @@ npm run dev
 ## 主要功能
 
 -   **DemoObject CRUD**: 一個功能完整的範例資源，展示了建立 (Create)、讀取 (Read)、更新 (Update) 與刪除 (Delete) 操作。
+-   **使用者管理與角色指派**:
+    -   管理員可管理使用者 (Application Users) 與角色 (Roles)。
+    -   支援在使用者編輯頁面直接指派多個角色 (Roles)。
+    -   實作了安全的密碼重置與複雜密碼生成功能。
 -   **身分驗證**: 使用由後端發出的 JWT Token 進行安全登入。
 -   **整潔架構**: 清楚分離 API 定義與 UI 邏輯。

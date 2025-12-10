@@ -17,9 +17,9 @@ export const authProvider: AuthProvider = {
         const token = await response.text();
         localStorage.setItem(TOKEN_KEY, token);
 
-        // Fetch user details including Photo and Roles
+        // Fetch user details including Photo and Roles with IsAdministrative flag
         try {
-          const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/odata/ApplicationUser?$filter=UserName eq '${username}'&$top=1&$expand=Roles`, {
+          const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/odata/ApplicationUser?$filter=UserName eq '${username}'&$top=1&$expand=Roles($select=Name,IsAdministrative)`, {
             headers: {
               "Authorization": `Bearer ${token}`
             }
@@ -36,11 +36,14 @@ export const authProvider: AuthProvider = {
               localStorage.setItem("user_name", user.DisplayName || user.UserName);
               localStorage.setItem("user_id", user.Oid);
 
-              // Store Roles
+              // Check if user is Admin
+              let isAdmin = false;
               if (user.Roles) {
                 const roles = user.Roles.map((r: any) => r.Name);
                 localStorage.setItem("user_roles", JSON.stringify(roles));
+                isAdmin = user.Roles.some((r: any) => r.IsAdministrative);
               }
+              localStorage.setItem("user_is_admin", isAdmin ? "true" : "false");
             }
           }
         } catch (error) {
@@ -76,6 +79,7 @@ export const authProvider: AuthProvider = {
     localStorage.removeItem("user_name");
     localStorage.removeItem("user_id");
     localStorage.removeItem("user_roles");
+    localStorage.removeItem("user_is_admin");
     return {
       success: true,
       redirectTo: "/login",

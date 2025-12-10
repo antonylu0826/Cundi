@@ -14,6 +14,7 @@ import {
   AppstoreOutlined,
   UserOutlined,
   SettingOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 
 import routerProvider, {
@@ -43,6 +44,12 @@ import {
   ApplicationUserCreate,
   ApplicationUserEdit,
 } from "./pages/application-users";
+
+import {
+  RoleList,
+  RoleCreate,
+  RoleEdit,
+} from "./pages/roles";
 
 import { Header } from "./components/header";
 import { ColorModeContextProvider, useColorMode } from "./contexts/color-mode";
@@ -102,6 +109,26 @@ const InnerApp: React.FC = () => {
               },
 
               {
+                name: "PermissionPolicyRole",
+                list: "/PermissionPolicyRoles",
+                create: "/PermissionPolicyRoles/create",
+                edit: "/PermissionPolicyRoles/edit/:id",
+                meta: {
+                  label: "Roles",
+                  parent: "Settings",
+                  icon: <TeamOutlined />,
+                }
+              },
+
+              {
+                name: "Settings",
+                meta: {
+                  label: "Settings",
+                  icon: <SettingOutlined />,
+                }
+              },
+
+              {
                 name: "DemoDetail",
                 list: "/DemoDetails",
                 meta: {
@@ -140,6 +167,12 @@ const InnerApp: React.FC = () => {
                   <Route index element={<ApplicationUserList />} />
                   <Route path="create" element={<ApplicationUserCreate />} />
                   <Route path="edit/:id" element={<ApplicationUserEdit />} />
+                </Route>
+
+                <Route path="/PermissionPolicyRoles">
+                  <Route index element={<RoleList />} />
+                  <Route path="create" element={<RoleCreate />} />
+                  <Route path="edit/:id" element={<RoleEdit />} />
                 </Route>
 
               </Route>

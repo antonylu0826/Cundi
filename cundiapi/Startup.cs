@@ -57,6 +57,7 @@ public class Startup
             {
                 // Make your business objects available in the Web API and generate the GET, POST, PUT, and DELETE HTTP methods for it.
                 options.BusinessObject<ApplicationUser>();
+                options.BusinessObject<PermissionPolicyRole>();
                 options.BusinessObject<DemoObject>();
                 options.BusinessObject<DemoDetail>();
 

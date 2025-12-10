@@ -287,3 +287,60 @@ export const YourDetailFormFields: React.FC<{ mode: "create" | "edit" }> = ({ mo
 -   **Stable UI**: Modals are optimized to prevent freeze bugs.
 -   **Late Binding**: Handles async `masterId` loading.
 -   **Automation Ready**: Supports `data-testid`.
+
+---
+
+## Part 4: User & Role Management Implementation
+
+This section details the implementation of user permissions and role assignment, which involves custom handling beyond standard CRUD.
+
+### 1. Role Assignment Architecture
+
+Standard OData v4 often handles primitive properties easily but requires special handling for many-to-many relationships like `ApplicationUser.Roles` when updating.
+
+#### Backend (`UserController.cs`)
+We implemented a custom API endpoint `UpdateUserRoles` because standard OData PATCH requests might not correctly handle the replacement of the entire Roles collection in a single transaction easily without complex OData batching.
+
+**Endpoint:** `POST /api/User/UpdateUserRoles`
+
+**Logic:**
+1.  Accept `UserId` and a list of `RoleIds`.
+2.  Fetch the user and the target roles from the database.
+3.  **Sync Logic**:
+    -   Remove roles present in the user's current list but NOT in the new list.
+    -   Add roles present in the new list but NOT in the user's current list.
+4.  Commit changes.
+
+#### Frontend (`ApplicationUserEdit` in `edit.tsx`)
+The frontend uses a two-step process to update a user with roles, avoiding "Unsaved Changes" issues and ensuring data consistency.
+
+1.  **Step 1: Update User Details**: Standard Refine `useForm` hooks update the user's primitive fields (Name, Email, etc.) via OData.
+2.  **Step 2: Update Roles**: We utilize the `onMutationSuccess` callback of `useForm`.
+    -   Inside this callback, we extract the selected `Roles` (array of Oids).
+    -   We make a separate `fetch` call to the custom `UpdateUserRoles` endpoint.
+    -   Upon success, we show a success message using `App.useApp().message`.
+
+**Code Pattern:**
+```tsx
+const { formProps } = useForm<IApplicationUser>({
+    meta: {
+        expand: ["Roles"] // Expand to get current roles
+    },
+    onMutationSuccess: async (data, variables) => {
+        // 1. Get Roles from form
+        const roles = form?.getFieldValue("Roles");
+        // 2. Normalize to IDs
+        const roleIds = normalizeRoles(roles);
+        
+        // 3. Call Custom API
+        await fetch(`${import.meta.env.VITE_API_URL}/User/UpdateUserRoles`, { ... });
+    }
+});
+```
+
+### 2. Frontend Permissions (`accessControlProvider.ts`)
+We use a lightweight permission check on the frontend for UI visibility (hiding menus), while the Backend enforces actual security.
+
+-   **Mechanism**: On login, we check if the user has an `IsAdministrative` role.
+-   **Storage**: This flag is stored in `localStorage` (`user_is_admin`).
+-   **Usage**: The `accessControlProvider` checks this flag to allow/deny access to resources like "Settings", "PermissionPolicyRole", and "ApplicationUser".
