@@ -17,9 +17,9 @@ export const authProvider: AuthProvider = {
         const token = await response.text();
         localStorage.setItem(TOKEN_KEY, token);
 
-        // Fetch user details including Photo
+        // Fetch user details including Photo and Roles
         try {
-          const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/odata/ApplicationUser?$filter=UserName eq '${username}'&$top=1`, {
+          const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/odata/ApplicationUser?$filter=UserName eq '${username}'&$top=1&$expand=Roles`, {
             headers: {
               "Authorization": `Bearer ${token}`
             }
@@ -35,6 +35,12 @@ export const authProvider: AuthProvider = {
               }
               localStorage.setItem("user_name", user.DisplayName || user.UserName);
               localStorage.setItem("user_id", user.Oid);
+
+              // Store Roles
+              if (user.Roles) {
+                const roles = user.Roles.map((r: any) => r.Name);
+                localStorage.setItem("user_roles", JSON.stringify(roles));
+              }
             }
           }
         } catch (error) {
@@ -69,6 +75,7 @@ export const authProvider: AuthProvider = {
     localStorage.removeItem("user_photo");
     localStorage.removeItem("user_name");
     localStorage.removeItem("user_id");
+    localStorage.removeItem("user_roles");
     return {
       success: true,
       redirectTo: "/login",
@@ -87,7 +94,10 @@ export const authProvider: AuthProvider = {
       redirectTo: "/login",
     };
   },
-  getPermissions: async () => null,
+  getPermissions: async () => {
+    const roles = localStorage.getItem("user_roles");
+    return roles ? JSON.parse(roles) : [];
+  },
   getIdentity: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     const photo = localStorage.getItem("user_photo");

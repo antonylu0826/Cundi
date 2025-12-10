@@ -13,6 +13,7 @@ import {
   DashboardOutlined,
   AppstoreOutlined,
   UserOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 
 import routerProvider, {
@@ -46,6 +47,8 @@ import {
 import { Header } from "./components/header";
 import { ColorModeContextProvider, useColorMode } from "./contexts/color-mode";
 
+import { accessControlProvider } from "./accessControlProvider";
+
 const API_URL = import.meta.env.VITE_API_URL + "/odata";
 
 const InnerApp: React.FC = () => {
@@ -62,6 +65,7 @@ const InnerApp: React.FC = () => {
         <AntdApp>
           <Refine
             authProvider={authProvider}
+            accessControlProvider={accessControlProvider}
             dataProvider={dataProvider(API_URL)}
             routerProvider={routerProvider}
             resources={[
