@@ -1,0 +1,4 @@
+/* Hide CSS for specific elements if needed */
+.ant-layout-sider-children .ant-menu-item-danger {
+  display: none !important;
+}
