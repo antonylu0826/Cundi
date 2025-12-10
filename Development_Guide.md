@@ -341,6 +341,40 @@ const { formProps } = useForm<IApplicationUser>({
 ### 2. Frontend Permissions (`accessControlProvider.ts`)
 We use a lightweight permission check on the frontend for UI visibility (hiding menus), while the Backend enforces actual security.
 
--   **Mechanism**: On login, we check if the user has an `IsAdministrative` role.
--   **Storage**: This flag is stored in `localStorage` (`user_is_admin`).
 -   **Usage**: The `accessControlProvider` checks this flag to allow/deny access to resources like "Settings", "PermissionPolicyRole", and "ApplicationUser".
+
+### 3. Type Permissions (Advanced Nested Data)
+
+Handling `TypePermissions` in Roles presents specific challenges due to the nested nature of the data and XAF OData serialization rules.
+
+#### Backend Challenges & Solutions
+
+1.  **Serialization of Nested Objects**:
+    *   **Issue**: By default, XAF's OData service might not serialze nested collections like `TypePermissions` even if `$expand` is requested, because the type `PermissionPolicyTypePermissionObject` isn't explicitly exposed.
+    *   **Fix**: Register the type in `Startup.cs`:
+        ```csharp
+        options.BusinessObject<PermissionPolicyTypePermissionObject>();
+        ```
+
+2.  **Updating Nested Collections**:
+    *   **Issue**: Standard OData PATCH/PUT often struggles with reconciling nested collections (Add/Update/Delete mixed operations).
+    *   **Fix**: Implemented `POST /api/Role/UpdateRole` in `RoleController.cs`. This custom endpoint accepts a DTO with the full list of permissions and handles the reconciliation logic (deleting missing permissions, updating existing ones, adding new ones) on the server side.
+
+#### Frontend Challenges & Solutions (`RoleEdit` in `edit.tsx`)
+
+1.  **Form Context Loss**:
+    *   **Issue**: `Form.List` (used for the dynamic list of permissions) can lose connection to the main `Form` instance when used with `useForm` from `@refinedev/antd` in complex layouts.
+    *   **Fix**: Manually create the form instance `const [form] = Form.useForm()` and pass it to Refine's `useForm` via `formProps`. We also manually handle the `Create` and `Save` actions to ensure the form values, including nested lists, are correctly submitted.
+
+2.  **Data Normalization (Field Mismatch)**:
+    *   **Issue**: XAF OData returns the target type name as `TargetTypeFullName`, but the frontend form and our custom Update API expect `TargetType`.
+    *   **Fix**: In the `useEffect` that loads initial values, we map the fields:
+        ```tsx
+        values.TypePermissions = values.TypePermissions.map((p: any) => ({
+            ...p,
+            TargetType: p.TargetType || p.TargetTypeFullName
+        }));
+        ```
+
+3.  **Dynamic Type Loading**:
+    *   **Feature**: Instead of hardcoding business types, we fetch them dynamically from `api/Model/BusinessObjects` (exposed via `ModelController.cs`) using the `useModelTypes` hook. This ensures the UI always correctly reflects the available system types.

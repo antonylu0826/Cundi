@@ -67,6 +67,9 @@ The application will launch at `http://localhost:5173`.
 -   **User Management & Role Assignment**:
     -   Administrators can manage Application Users and Roles.
     -   Support for assigning multiple Roles directly from the User Edit page.
-    -   Secure password reset and complex password generation features.
+    -   **Advanced Role-based Access Control**:
+        -   Support for granular **Type Permissions** (configuring Read, Write, Create, Delete access per Business Object).
+        -   Dynamic loading of system types for permission configuration.
+        -   Solves complex OData nested serialization and XAF security compatibility issues (detailed in Development Guide).
 -   **Authentication**: Secure login utilizing JWT tokens issued by the backend.
 -   **Clean Architecture**: Separation of concerns between API definitions and UI logic.

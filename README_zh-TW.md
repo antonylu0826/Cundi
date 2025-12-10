@@ -68,5 +68,9 @@ npm run dev
     -   管理員可管理使用者 (Application Users) 與角色 (Roles)。
     -   支援在使用者編輯頁面直接指派多個角色 (Roles)。
     -   實作了安全的密碼重置與複雜密碼生成功能。
+    -   **進階角色權限控制 (Advanced RBAC)**:
+        -   支援細緻的 **Type Permissions** 設定 (針對個別業務物件設定讀、寫、建立、刪除權限)。
+        -   動態載入系統類型 (Business Object Types) 以供設定。
+        -   解決了複雜的 OData 巢狀序列化與 XAF 安全性相容問題 (詳見開發指南)。
 -   **身分驗證**: 使用由後端發出的 JWT Token 進行安全登入。
 -   **整潔架構**: 清楚分離 API 定義與 UI 邏輯。
