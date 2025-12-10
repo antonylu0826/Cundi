@@ -1,14 +1,28 @@
 import React from "react";
 import { IResourceComponentsProps } from "@refinedev/core";
 import { Create, useForm } from "@refinedev/antd";
-import { Form, Input, Checkbox } from "antd";
+import { Form, Input, Checkbox, Select } from "antd";
+import { SecurityPermissionPolicy } from "../../interfaces";
+import { TypePermissionList } from "./TypePermissionList";
 
 export const RoleCreate: React.FC<IResourceComponentsProps> = () => {
+    const [form] = Form.useForm();
     const { formProps, saveButtonProps } = useForm();
 
+    const handleSave = () => {
+        form.submit();
+    };
+
     return (
-        <Create saveButtonProps={saveButtonProps}>
-            <Form {...formProps} layout="vertical">
+        <Create saveButtonProps={{ ...saveButtonProps, onClick: handleSave }}>
+            <Form
+                {...formProps}
+                form={form}
+                layout="vertical"
+                onFinish={(values) => {
+                    return formProps.onFinish && formProps.onFinish(values);
+                }}
+            >
                 <Form.Item
                     label="Name"
                     name="Name"
@@ -23,7 +37,22 @@ export const RoleCreate: React.FC<IResourceComponentsProps> = () => {
                 >
                     <Checkbox>Is Administrative</Checkbox>
                 </Form.Item>
+                <Form.Item
+                    label="Permission Policy"
+                    name="PermissionPolicy"
+                    initialValue={SecurityPermissionPolicy.DenyAllByDefault}
+                    rules={[{ required: true }]}
+                >
+                    <Select
+                        options={[
+                            { label: "Deny All By Default", value: SecurityPermissionPolicy.DenyAllByDefault },
+                            { label: "Read Only All By Default", value: SecurityPermissionPolicy.ReadOnlyAllByDefault },
+                            { label: "Allow All By Default", value: SecurityPermissionPolicy.AllowAllByDefault },
+                        ]}
+                    />
+                </Form.Item>
+                <TypePermissionList />
             </Form>
-        </Create>
+        </Create >
     );
 };

@@ -58,6 +58,7 @@ public class Startup
                 // Make your business objects available in the Web API and generate the GET, POST, PUT, and DELETE HTTP methods for it.
                 options.BusinessObject<ApplicationUser>();
                 options.BusinessObject<PermissionPolicyRole>();
+                options.BusinessObject<PermissionPolicyTypePermissionObject>();
                 options.BusinessObject<DemoObject>();
                 options.BusinessObject<DemoDetail>();
 
@@ -185,6 +186,7 @@ public class Startup
         services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(o =>
         {
             o.JsonSerializerOptions.PropertyNamingPolicy = null;
+            o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         });
     }
 

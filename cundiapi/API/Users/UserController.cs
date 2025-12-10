@@ -1,12 +1,8 @@
 using CundiApi.BusinessObjects;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Core;
-using DevExpress.ExpressApp.Security;
+using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CundiApi.API.Users;
 
@@ -56,7 +52,7 @@ public class UserController : ControllerBase
         }
 
         // Fetch all roles to map Oids to objects
-        var rolesToAssign = objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.PermissionPolicy.PermissionPolicyRole>()
+        var rolesToAssign = objectSpace.GetObjectsQuery<PermissionPolicyRole>()
             .Where(r => dto.RoleIds.Contains(r.Oid))
             .ToList();
 

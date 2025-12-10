@@ -17,6 +17,7 @@ export const RoleList: React.FC<IResourceComponentsProps> = () => {
                     title="Is Administrative"
                     render={(value: boolean) => <Checkbox checked={value} disabled />}
                 />
+                <Table.Column dataIndex="PermissionPolicy" title="Permission Policy" />
                 <Table.Column
                     title="Actions"
                     dataIndex="actions"

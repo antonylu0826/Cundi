@@ -131,6 +131,27 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
     },
 
     update: async ({ resource, id, variables }) => {
+        // Special handling for Role updates to support nested TypePermissions
+        if (resource === "PermissionPolicyRole") {
+            const apiBase = apiUrl.endsWith('/odata') ? apiUrl.substring(0, apiUrl.length - 6) : apiUrl;
+
+            const response = await fetch(`${apiBase}/Role/UpdateRole`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
+                },
+                body: JSON.stringify({ ...variables, Oid: id }),
+            });
+            if (!response.ok) {
+                const error: any = new Error(response.statusText);
+                error.statusCode = response.status;
+                throw error;
+            }
+            const data = await response.json();
+            return { data: { ...variables, id } as any };
+        }
+
         const response = await fetch(`${apiUrl}/${resource}(${id})`, {
             method: "PATCH",
             headers: {
