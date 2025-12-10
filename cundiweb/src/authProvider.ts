@@ -17,23 +17,47 @@ export const authProvider: AuthProvider = {
         const token = await response.text();
         localStorage.setItem(TOKEN_KEY, token);
 
+        // Parse JWT to get claims
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        const claims = JSON.parse(jsonPayload);
+        console.log("[Login] JWT Claims:", claims);
+
+        const userId = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || claims.sub || claims.id || claims.Oid;
+        const claimName = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || claims.unique_name || claims.name || username;
+
         // Fetch user details including Photo and Roles with IsAdministrative flag
         try {
-          const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/odata/ApplicationUser?$filter=UserName eq '${username}'&$top=1&$expand=Roles($select=Name,IsAdministrative)`, {
+          // Fallback to username if ID not found (though ID is preferable)
+          let queryUrl = `${import.meta.env.VITE_API_URL}/odata/ApplicationUser?$filter=tolower(UserName) eq '${username.toLowerCase()}'&$top=1&$expand=Roles($select=Name,IsAdministrative)`;
+
+          if (userId) {
+            queryUrl = `${import.meta.env.VITE_API_URL}/odata/ApplicationUser(${userId})?$expand=Roles($select=Name,IsAdministrative)`;
+          }
+
+          const userResponse = await fetch(queryUrl, {
             headers: {
               "Authorization": `Bearer ${token}`
             }
           });
           if (userResponse.ok) {
             const data = await userResponse.json();
-            if (data.value && data.value.length > 0) {
-              const user = data.value[0];
+
+            // Handle both List response (from filter) and Single response (from ID)
+            const user = userId ? data : (data.value && data.value.length > 0 ? data.value[0] : null);
+
+            if (user) {
               if (user.Photo) {
                 localStorage.setItem("user_photo", user.Photo);
               } else {
                 localStorage.removeItem("user_photo");
               }
-              localStorage.setItem("user_name", user.DisplayName || user.UserName);
+              // Logic: DisplayName > UserName > ClaimName > Username Input
+              localStorage.setItem("user_name", user.DisplayName || user.UserName || claimName);
               localStorage.setItem("user_id", user.Oid);
 
               // Check if user is Admin
@@ -105,7 +129,7 @@ export const authProvider: AuthProvider = {
   getIdentity: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     const photo = localStorage.getItem("user_photo");
-    const name = localStorage.getItem("user_name") || "Admin";
+    const name = localStorage.getItem("user_name") || "";
     const id = localStorage.getItem("user_id");
 
     if (token) {

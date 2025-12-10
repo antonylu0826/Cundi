@@ -3,7 +3,11 @@ import { IResourceComponentsProps } from "@refinedev/core";
 import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input, Checkbox, Select, Space, Card, Row, Col, Button, Spin } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { SecurityPermissionPolicy, SecurityPermissionState } from "../../interfaces";
+import {
+    SecurityPermissionPolicy,
+    SecurityPermissionState,
+    IPermissionPolicyTypePermissionObject
+} from "../../interfaces";
 import { useModelTypes } from "../../hooks/useModelTypes";
 
 const permissionStates = [
@@ -28,9 +32,9 @@ export const RoleEdit: React.FC<IResourceComponentsProps> = () => {
 
             // Map TargetTypeFullName from OData to TargetType for the form
             if (values.TypePermissions) {
-                values.TypePermissions = values.TypePermissions.map((p: any) => ({
+                values.TypePermissions = values.TypePermissions.map((p: IPermissionPolicyTypePermissionObject & { TargetTypeFullName?: string }) => ({
                     ...p,
-                    TargetType: p.TargetType || p.TargetTypeFullName
+                    TargetType: p.TargetType || p.TargetTypeFullName || ""
                 }));
             }
 

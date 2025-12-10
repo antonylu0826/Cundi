@@ -20,5 +20,6 @@ export const useModelTypes = () => {
 
             return response.json() as Promise<{ Label: string; Value: string }[]>;
         },
+        staleTime: 60 * 60 * 1000, // 1 hour - Business Types rarely change
     });
 };

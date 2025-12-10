@@ -1,6 +1,5 @@
-using CundiApi.BusinessObjects;
+using CundiApi.DTOs;
 using DevExpress.ExpressApp;
-using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,11 +36,15 @@ public class RoleController : ControllerBase
         role.PermissionPolicy = dto.PermissionPolicy;
 
         // Reconcile TypePermissions
-        // 1. Identify permissions to delete
+        // 1. Identify permissions to delete using optimized HashSet Lookup
+        var incomingOids = dto.TypePermissions != null
+            ? new HashSet<Guid>(dto.TypePermissions.Select(p => p.Oid).Where(oid => oid != Guid.Empty))
+            : new HashSet<Guid>();
+
         var permissionsToDelete = new List<PermissionPolicyTypePermissionObject>();
         foreach (var existingPerm in role.TypePermissions)
         {
-            if (dto.TypePermissions == null || !dto.TypePermissions.Any(p => p.Oid == existingPerm.Oid))
+            if (!incomingOids.Contains(existingPerm.Oid))
             {
                 permissionsToDelete.Add(existingPerm);
             }
@@ -90,24 +93,4 @@ public class RoleController : ControllerBase
 
         return Ok(new { Oid = role.Oid });
     }
-}
-
-public class RoleUpdateDto
-{
-    public Guid Oid { get; set; }
-    public string Name { get; set; }
-    public bool IsAdministrative { get; set; }
-    public SecurityPermissionPolicy PermissionPolicy { get; set; }
-    public List<TypePermissionDto> TypePermissions { get; set; }
-}
-
-public class TypePermissionDto
-{
-    public Guid Oid { get; set; }
-    public string TargetType { get; set; }
-    public SecurityPermissionState? ReadState { get; set; }
-    public SecurityPermissionState? WriteState { get; set; }
-    public SecurityPermissionState? CreateState { get; set; }
-    public SecurityPermissionState? DeleteState { get; set; }
-    public SecurityPermissionState? NavigateState { get; set; }
 }

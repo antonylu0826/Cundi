@@ -71,9 +71,11 @@ public class Updater : ModuleUpdater
         {
             defaultRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
             defaultRole.Name = "Default";
+            defaultRole.PermissionPolicy = SecurityPermissionPolicy.DenyAllByDefault;
 
+            // Allow Read own user record
             defaultRole.AddObjectPermissionFromLambda<ApplicationUser>(SecurityOperations.Read, cm => cm.Oid == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
-            // Grant Write permission ONLY to the Photo property
+            // Allow Write ONLY for Photo property
             defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "Photo", cm => cm.Oid == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
 
             defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
