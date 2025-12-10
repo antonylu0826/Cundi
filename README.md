@@ -11,7 +11,7 @@ This project demonstrates a Headless CMS architecture using **DevExpress XAF** f
 ## Technology Stack
 
 ### Backend (`cundiapi`)
--   **Framework**: .NET 6 / 8
+-   **Framework**: .NET 9
 -   **Core Library**: DevExpress XAF (Headless Web API)
 -   **ORM**: XPO (eXpress Persistent Objects)
 -   **API Protocol**: OData v4
@@ -21,7 +21,7 @@ This project demonstrates a Headless CMS architecture using **DevExpress XAF** f
     -   Swagger UI for API documentation
 
 ### Frontend (`cundiweb`)
--   **Framework**: React 18
+-   **Framework**: React 19
 -   **Build Tool**: Vite
 -   **Metasystem**: [Refine](https://refine.dev/)
 -   **UI Library**: Ant Design

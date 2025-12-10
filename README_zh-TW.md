@@ -11,7 +11,7 @@ Cundi 是一個結合了強大 .NET 後端與響應式 React 前端的現代化�
 ## 技術堆疊
 
 ### 後端 (`cundiapi`)
--   **框架**: .NET 6 / 8
+-   **框架**: .NET 9
 -   **核心庫**: DevExpress XAF (Headless Web API)
 -   **ORM**: XPO (eXpress Persistent Objects)
 -   **API 協定**: OData v4
@@ -21,7 +21,7 @@ Cundi 是一個結合了強大 .NET 後端與響應式 React 前端的現代化�
     -   Swagger UI API 文件
 
 ### 前端 (`cundiweb`)
--   **框架**: React 18
+-   **框架**: React 19
 -   **建置工具**: Vite
 -   **中台框架**: [Refine](https://refine.dev/)
 -   **UI 函式庫**: Ant Design

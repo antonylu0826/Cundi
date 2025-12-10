@@ -34,16 +34,6 @@ export const Header: React.FC = () => {
             icon: mode === "light" ? <MoonOutlined /> : <SunOutlined />,
             onClick: () => setMode(mode === "light" ? "dark" : "light"),
         },
-        {
-            type: "divider",
-        },
-        {
-            key: "logout",
-            label: "Logout",
-            icon: <LogoutOutlined />,
-            danger: true,
-            onClick: () => logout(),
-        },
     ];
 
     return (
