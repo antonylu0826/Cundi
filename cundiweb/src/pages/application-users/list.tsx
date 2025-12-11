@@ -15,7 +15,7 @@ import {
 import { KeyOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { SharedList } from "../../components/SharedList";
 import { IApplicationUser } from "../../interfaces";
-import { TOKEN_KEY } from "../../authProvider";
+import { authService } from "../../services/authService";
 
 export const ApplicationUserList: React.FC<IResourceComponentsProps> = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,37 +44,19 @@ export const ApplicationUserList: React.FC<IResourceComponentsProps> = () => {
         if (!selectedUser) return;
         setIsLoading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/User/ResetPassword`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
-                },
-                body: JSON.stringify({
-                    userId: selectedUser.Oid,
-                    newPassword: values.password
-                })
-            });
+            await authService.resetPassword(selectedUser.Oid, values.password);
 
-            if (response.ok) {
-                open({
-                    type: "success",
-                    message: "Success",
-                    description: "Password reset successfully",
-                });
-                setIsModalOpen(false);
-            } else {
-                open({
-                    type: "error",
-                    message: "Error",
-                    description: "Failed to reset password",
-                });
-            }
+            open?.({
+                type: "success",
+                message: "Success",
+                description: "Password reset successfully",
+            });
+            setIsModalOpen(false);
         } catch (error) {
-            open({
+            open?.({
                 type: "error",
                 message: "Error",
-                description: "Network error",
+                description: "Failed to reset password",
             });
         } finally {
             setIsLoading(false);

@@ -1,5 +1,5 @@
 import { DataProvider } from "@refinedev/core";
-import { TOKEN_KEY } from "./authProvider";
+import { httpClient } from "./utils/httpClient";
 
 // Simple OData V4 Provider for Refine
 // Assumes XAF OData endpoint structure
@@ -68,16 +68,14 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
 
         url.searchParams.append("$count", "true");
 
-        const response = await fetch(url.toString(), {
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
-            }
-        });
+        // httpClient expects endpoint relative to VITE_API_URL if string, or full URL?
+        // My httpClient impl handles string endpoint. But `apiUrl` passed in here might be full URL.
+        // `url` object is absolute.
+        // `httpClient` impl: uses `endpoint.startsWith("http")` check.
+        const response = await httpClient(url.toString());
 
-        if (!response.ok) {
-            const error: any = new Error(response.statusText);
-            error.statusCode = response.status;
-            throw error;
+        if (!response) {
+            return { data: [], total: 0 };
         }
 
         const data = await response.json();
@@ -98,34 +96,20 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
             }
         }
 
-        const response = await fetch(url.toString(), {
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
-            }
-        });
-        if (!response.ok) {
-            const error: any = new Error(response.statusText);
-            error.statusCode = response.status;
-            throw error;
-        }
+        const response = await httpClient(url.toString());
+        if (!response) throw new Error("Item not found");
+
         const data = await response.json();
         return { data: { ...data, id: data.Oid } };
     },
 
     create: async ({ resource, variables }) => {
-        const response = await fetch(`${apiUrl}/${resource}`, {
+        const response = await httpClient(`${apiUrl}/${resource}`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
-            },
             body: JSON.stringify(variables),
         });
-        if (!response.ok) {
-            const error: any = new Error(response.statusText);
-            error.statusCode = response.status;
-            throw error;
-        }
+        if (!response) throw new Error("Create failed with no response");
+
         const data = await response.json();
         return { data };
     },
@@ -135,56 +119,36 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
         if (resource === "PermissionPolicyRole") {
             const apiBase = apiUrl.endsWith('/odata') ? apiUrl.substring(0, apiUrl.length - 6) : apiUrl;
 
-            const response = await fetch(`${apiBase}/Role/UpdateRole`, {
+            const response = await httpClient(`${apiBase}/Role/UpdateRole`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
-                },
                 body: JSON.stringify({ ...variables, Oid: id }),
             });
-            if (!response.ok) {
-                const error: any = new Error(response.statusText);
-                error.statusCode = response.status;
-                throw error;
-            }
+
+            if (!response) throw new Error("Update failed with no response");
+
             const data = await response.json();
             return { data: { ...variables, id } as any };
         }
 
-        const response = await fetch(`${apiUrl}/${resource}(${id})`, {
+        const response = await httpClient(`${apiUrl}/${resource}(${id})`, {
             method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
-            },
             body: JSON.stringify(variables),
         });
-        if (!response.ok) {
-            const error: any = new Error(response.statusText);
-            error.statusCode = response.status;
-            throw error;
-        }
+
         // OData PATCH might return 204 No Content
-        if (response.status === 204) {
+        if (!response) { // 204
             return { data: { id, ...variables } as any };
         }
+
         const data = await response.json();
         return { data };
     },
 
     deleteOne: async ({ resource, id }) => {
-        const response = await fetch(`${apiUrl}/${resource}(${id})`, {
+        const response = await httpClient(`${apiUrl}/${resource}(${id})`, {
             method: "DELETE",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
-            }
         });
-        if (!response.ok) {
-            const error: any = new Error(response.statusText);
-            error.statusCode = response.status;
-            throw error;
-        }
+        // 204 check handled by httpClient return null
         return { data: { id } as any };
     },
 

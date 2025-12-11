@@ -1,91 +1,73 @@
 import { AuthProvider } from "@refinedev/core";
-
-export const TOKEN_KEY = "refine-auth";
+import { authService } from "./services/authService";
+import { TOKEN_KEY, parseJwt } from "./utils/httpClient";
 
 export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/Authentication/Authenticate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userName: username, password }),
-      });
+      const token = await authService.login({ username, password });
 
-      if (response.ok) {
-        const token = await response.text();
+      if (token) {
         localStorage.setItem(TOKEN_KEY, token);
 
         // Parse JWT to get claims
         const claims = parseJwt(token);
-
+        // Standardize claims extraction
         const userId = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || claims.sub || claims.id || claims.Oid;
         const claimName = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || claims.unique_name || claims.name || username;
 
-        // Fetch user details including Photo and Roles with IsAdministrative flag
+        // Fetch user details
         try {
-          // Fallback to username if ID not found (though ID is preferable)
-          let queryUrl = `${import.meta.env.VITE_API_URL}/odata/ApplicationUser?$filter=tolower(UserName) eq '${username.toLowerCase()}'&$top=1&$expand=Roles($select=Name,IsAdministrative)`;
-
+          let user = null;
           if (userId) {
-            queryUrl = `${import.meta.env.VITE_API_URL}/odata/ApplicationUser(${userId})?$expand=Roles($select=Name,IsAdministrative)`;
+            user = await authService.getUserById(userId);
+          } else {
+            user = await authService.getUserByUsername(username);
           }
 
-          const userResponse = await fetch(queryUrl, {
-            headers: {
-              "Authorization": `Bearer ${token}`
+          if (user) {
+            if (user.Photo) {
+              localStorage.setItem("user_photo", user.Photo);
+            } else {
+              localStorage.removeItem("user_photo");
             }
-          });
-          if (userResponse.ok) {
-            const data = await userResponse.json();
 
-            // Handle both List response (from filter) and Single response (from ID)
-            const user = userId ? data : (data.value && data.value.length > 0 ? data.value[0] : null);
+            localStorage.setItem("user_name", user.DisplayName || user.UserName || claimName);
+            localStorage.setItem("user_id", (user as any).Oid || userId); // Cast as any because Oid is in IApplicationUser but double check
 
-            if (user) {
-              if (user.Photo) {
-                localStorage.setItem("user_photo", user.Photo);
-              } else {
-                localStorage.removeItem("user_photo");
-              }
-              // Logic: DisplayName > UserName > ClaimName > Username Input
-              localStorage.setItem("user_name", user.DisplayName || user.UserName || claimName);
-              localStorage.setItem("user_id", user.Oid);
-
-              // Check if user is Admin
-              let isAdmin = false;
-              if (user.Roles) {
-                const roles = user.Roles.map((r: any) => r.Name);
-                localStorage.setItem("user_roles", JSON.stringify(roles));
-                isAdmin = user.Roles.some((r: any) => r.IsAdministrative);
-              }
-              localStorage.setItem("user_is_admin", isAdmin ? "true" : "false");
+            // Check if user is Admin
+            let isAdmin = false;
+            if ((user as any).Roles) { // Roles not in interface yet or need to be added
+              const roles = (user as any).Roles.map((r: any) => r.Name);
+              localStorage.setItem("user_roles", JSON.stringify(roles));
+              isAdmin = (user as any).Roles.some((r: any) => r.IsAdministrative);
             }
+            localStorage.setItem("user_is_admin", isAdmin ? "true" : "false");
           }
         } catch (error) {
           console.error("Failed to fetch user details", error);
+          // Don't fail login if profile fetch fails, but might be good to warn
         }
 
         return {
           success: true,
           redirectTo: "/",
         };
-      } else {
-        return {
-          success: false,
-          error: {
-            message: "Login failed",
-            name: "Invalid email or password",
-          },
-        };
       }
+
+      return {
+        success: false,
+        error: {
+          message: "Login failed",
+          name: "Invalid credentials",
+        },
+      };
     } catch (e) {
       return {
         success: false,
         error: {
           message: "Login failed",
-          name: "Network error",
+          name: "Network or Server Error",
         },
       };
     }
@@ -105,7 +87,6 @@ export const authProvider: AuthProvider = {
   check: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
-      // Check if token is expired
       try {
         const claims = parseJwt(token);
         const exp = claims.exp;
@@ -118,7 +99,6 @@ export const authProvider: AuthProvider = {
           };
         }
       } catch (e) {
-        // If token cannot be parsed, treat as invalid
         console.error("Invalid token format", e);
         return {
           authenticated: false,
@@ -168,63 +148,31 @@ export const authProvider: AuthProvider = {
     return { error };
   },
   updatePassword: async ({ password }) => {
-    const token = localStorage.getItem(TOKEN_KEY);
     const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      return {
+        success: false,
+        error: {
+          message: "User ID not found",
+          name: "Error",
+        }
+      };
+    }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/User/ResetPassword`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          userId: userId,
-          newPassword: password
-        })
-      });
-
-      if (response.ok) {
-        return {
-          success: true,
-          redirectTo: "/login", // Redirect to login implies we might want to logout, let's check header.tsx behavior.
-          // Header.tsx had explicit logout(). Refine's updatePassword usually just returns success.
-          // But here we want to enforce logout or at least return success so the hook knows.
-          // If we return success: true, the useUpdatePassword hook will resolve successfully.
-        };
-      } else {
-        return {
-          success: false,
-          error: {
-            message: "Failed to change password",
-            name: "Update Password Error",
-          }
-        };
-      }
+      await authService.resetPassword(userId, password);
+      return {
+        success: true,
+        redirectTo: "/login",
+      };
     } catch (error) {
       return {
         success: false,
         error: {
-          message: "Network error",
-          name: "NetworkError",
+          message: "Failed to change password",
+          name: "Update Password Error",
         }
       };
     }
   },
 };
-
-// Helper to parse JWT
-function parseJwt(token: string) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-
-    return JSON.parse(jsonPayload);
-  } catch (e) {
-    console.error("Failed to parse JWT", e);
-    return {};
-  }
-}

@@ -4,7 +4,7 @@ import { Layout, Button, Space, Typography, Avatar, theme, Dropdown, MenuProps, 
 import { LogoutOutlined, UserOutlined, DownOutlined, SkinOutlined, SunOutlined, MoonOutlined, CameraOutlined, LockOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useColorMode } from "../contexts/color-mode";
 import { Base64Upload } from "./Base64Upload";
-import { TOKEN_KEY } from "../authProvider";
+import { TOKEN_KEY } from "../utils/httpClient";
 
 const { Text } = Typography;
 const { useToken } = theme;
