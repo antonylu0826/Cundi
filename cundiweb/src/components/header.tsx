@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLogout, useGetIdentity, useInvalidate } from "@refinedev/core";
+import { useLogout, useGetIdentity, useInvalidate, useUpdatePassword } from "@refinedev/core";
 import { Layout, Button, Space, Typography, Avatar, theme, Dropdown, MenuProps, Modal, Form, Input, message } from "antd";
 import { LogoutOutlined, UserOutlined, DownOutlined, SkinOutlined, SunOutlined, MoonOutlined, CameraOutlined, LockOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useColorMode } from "../contexts/color-mode";
@@ -11,6 +11,7 @@ const { useToken } = theme;
 
 export const Header: React.FC = () => {
     const { mutate: logout } = useLogout();
+    const { mutate: updatePassword } = useUpdatePassword();
     const { data: user } = useGetIdentity();
     const { mode, setMode } = useColorMode();
     const { token } = useToken();
@@ -66,33 +67,28 @@ export const Header: React.FC = () => {
     };
 
     const handlePasswordSubmit = async (values: { password: string }) => {
-        if (!user?.id) return;
         setIsPasswordLoading(true);
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/User/ResetPassword`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}`
+        updatePassword(
+            { password: values.password },
+            {
+                onSuccess: () => {
+                    message.success("Password changed successfully");
+                    setIsPasswordModalOpen(false);
+                    // logout(); // updatePassword will redirect to login page based on authProvider impl, but we can also force logout if needed. 
+                    // However, useLogout hook is cleaner. But let's see. 
+                    // authProvider.updatePassword returns success:true, redirectTo: "/login".
+                    // Refine might automatically redirect. Let's rely on provider's redirect action.
+                    // But to be safe and consistent with previous behavior (force logout), we can call logout() here too.
+                    logout();
                 },
-                body: JSON.stringify({
-                    userId: user.id,
-                    newPassword: values.password
-                })
-            });
-
-            if (response.ok) {
-                message.success("Password changed successfully");
-                setIsPasswordModalOpen(false);
-                logout(); // Logout after password change for security
-            } else {
-                message.error("Failed to change password");
+                onError: (error) => {
+                    message.error(error?.message || "Failed to change password");
+                },
+                onSettled: () => {
+                    setIsPasswordLoading(false);
+                }
             }
-        } catch (error) {
-            message.error("Network error");
-        } finally {
-            setIsPasswordLoading(false);
-        }
+        );
     };
 
     const menuItems: MenuProps["items"] = [

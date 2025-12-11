@@ -18,14 +18,7 @@ export const authProvider: AuthProvider = {
         localStorage.setItem(TOKEN_KEY, token);
 
         // Parse JWT to get claims
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-
-        const claims = JSON.parse(jsonPayload);
-        console.log("[Login] JWT Claims:", claims);
+        const claims = parseJwt(token);
 
         const userId = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || claims.sub || claims.id || claims.Oid;
         const claimName = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || claims.unique_name || claims.name || username;
@@ -112,6 +105,28 @@ export const authProvider: AuthProvider = {
   check: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
+      // Check if token is expired
+      try {
+        const claims = parseJwt(token);
+        const exp = claims.exp;
+        if (exp && Date.now() >= exp * 1000) {
+          console.warn("Token expired");
+          return {
+            authenticated: false,
+            redirectTo: "/login",
+            logout: true,
+          };
+        }
+      } catch (e) {
+        // If token cannot be parsed, treat as invalid
+        console.error("Invalid token format", e);
+        return {
+          authenticated: false,
+          redirectTo: "/login",
+          logout: true,
+        };
+      }
+
       return {
         authenticated: true,
       };
@@ -152,4 +167,64 @@ export const authProvider: AuthProvider = {
     }
     return { error };
   },
+  updatePassword: async ({ password }) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const userId = localStorage.getItem("user_id");
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/User/ResetPassword`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: userId,
+          newPassword: password
+        })
+      });
+
+      if (response.ok) {
+        return {
+          success: true,
+          redirectTo: "/login", // Redirect to login implies we might want to logout, let's check header.tsx behavior.
+          // Header.tsx had explicit logout(). Refine's updatePassword usually just returns success.
+          // But here we want to enforce logout or at least return success so the hook knows.
+          // If we return success: true, the useUpdatePassword hook will resolve successfully.
+        };
+      } else {
+        return {
+          success: false,
+          error: {
+            message: "Failed to change password",
+            name: "Update Password Error",
+          }
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          message: "Network error",
+          name: "NetworkError",
+        }
+      };
+    }
+  },
 };
+
+// Helper to parse JWT
+function parseJwt(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error("Failed to parse JWT", e);
+    return {};
+  }
+}
