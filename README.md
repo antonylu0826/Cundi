@@ -2,7 +2,7 @@
 
 Cundi is a modern full-stack application combining a robust .NET backend with a responsive React frontend.
 
-![Dashboard](./images/hero.png)
+![Dashboard](./assets/hero.png)
 
 ## Overview
 
@@ -22,6 +22,8 @@ This project demonstrates a Headless CMS architecture using **DevExpress XAF** f
     -   JWT Authentication
     -   Integrated Security System
     -   Swagger UI for API documentation
+    
+![Login](./assets/Login.png)
 
 ### Frontend (`cundiweb`)
 -   **Framework**: React 19
@@ -31,6 +33,7 @@ This project demonstrates a Headless CMS architecture using **DevExpress XAF** f
 -   **Core SDK**: `@cundi/xaf-refine-sdk`
 -   **Features**:
     -   **SmartList**: A powerful, reusable list component with built-in search, sorting, and column management (via SDK).
+        ![SmartList](./assets/SmartList.png)
     -   **RelatedList**: Specialized component for Master-Detail relationships (via SDK).
     -   Role-based Access Control (RBAC).
 
@@ -71,9 +74,15 @@ The application will launch at `http://localhost:5173`.
 -   **User Management & Role Assignment**:
     -   Administrators can manage Application Users and Roles.
     -   Support for assigning multiple Roles directly from the User Edit page.
+    -   **Authentication & Security**:
+        -   Secure login via JWT.
+        -   Password reset functionality.
+        ![ResetPassword](./assets/ResetPassword.png)
     -   **Advanced Role-based Access Control**:
         -   Support for granular **Type Permissions** (configuring Read, Write, Create, Delete access per Business Object).
         -   Dynamic loading of system types for permission configuration.
         -   Solves complex OData nested serialization and XAF security compatibility issues (detailed in Development Guide).
 -   **Authentication**: Secure login utilizing JWT tokens issued by the backend.
 -   **Clean Architecture**: Separation of concerns between API definitions and UI logic.
+-   **Tiptap Editor**: Rich text editing support.
+    ![Tiptap Editor](./assets/TiptapEditor.png)
