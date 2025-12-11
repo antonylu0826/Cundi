@@ -6,6 +6,9 @@ Cundi is a modern full-stack application combining a robust .NET backend with a 
 
 ## Overview
 
+> [繁體中文](./README_zh-TW.md)
+
+
 This project demonstrates a Headless CMS architecture using **DevExpress XAF** for the backend API and **Refine** for the frontend UI. It features a complete authentication flow across both layers and reusable components for rapid development. For detailed development guidelines, best practices, and architecture details, please refer to the [Development Guide](./Development_Guide.md).
 
 ## Technology Stack

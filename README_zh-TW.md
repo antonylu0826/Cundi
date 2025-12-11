@@ -6,6 +6,9 @@ Cundi 是一個結合了強大 .NET 後端與響應式 React 前端的現代化�
 
 ## 專案概覽
 
+> [English](./README.md)
+
+
 本專案展示了使用 **DevExpress XAF** 作為後端 API 以及 **Refine** 作為前端 UI 的 Headless CMS 架構。它具備完整的跨層身分驗證流程，並包含便於快速開發的可重複使用元件。有關詳細的開發指南、最佳實踐與架構細節，請參閱 [開發指南](./Development_Guide.md)。
 
 ## 技術堆疊
