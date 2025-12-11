@@ -25,9 +25,10 @@ This project demonstrates a Headless CMS architecture using **DevExpress XAF** f
 -   **Build Tool**: Vite
 -   **Metasystem**: [Refine](https://refine.dev/)
 -   **UI Library**: Ant Design
+-   **Core SDK**: `@cundi/xaf-refine-sdk`
 -   **Features**:
-    -   **SharedList**: A powerful, reusable list component with built-in search, sorting, and column management.
-    -   **SharedDetailList**: Specialized component for Master-Detail relationships.
+    -   **SmartList**: A powerful, reusable list component with built-in search, sorting, and column management (via SDK).
+    -   **RelatedList**: Specialized component for Master-Detail relationships (via SDK).
     -   Role-based Access Control (RBAC).
 
 ## Getting Started

@@ -124,7 +124,7 @@ export interface IDemoObject {
 Create `list.tsx`, `create.tsx`, and `edit.tsx`.
 
 **1. List View (`list.tsx`)**
-Use **[SharedList](#sharedlist)** for standard functionality. Define columns using `Table.Column`.
+Use **[SmartList](#smartlist)** (from `@cundi/xaf-refine-sdk`) for standard functionality. Define columns using `Table.Column`.
 
 *Examples:*
 
@@ -204,14 +204,14 @@ Use standard Ant Design form components.
 
 ---
 
-## Part 3: Shared Components Mechanism
+## Part 3: SDK Component Usage
 
-This section documents the reusable components available in the `cundiweb` project.
+This section documents the reusable components provided by `@cundi/xaf-refine-sdk`.
 
-<a id="sharedlist"></a>
-### 1. SharedList (Main Lists)
+<a id="smartlist"></a>
+### 1. SmartList (Main Lists)
 
-`SharedList` is a reusable wrapper around the Ant Design `Table` and Refine's `useTable` hook. It provides standardized features like search, refresh, and unified column visibility management.
+`SmartList` is a reusable wrapper around the Ant Design `Table` and Refine's `useTable` hook. It provides standardized features like search, refresh, and unified column visibility management.
 
 #### Features
 1.  **Unified Search**: Provides a search input that filters data based on specified fields. Clearing input reloads all data.
@@ -232,7 +232,9 @@ This section documents the reusable components available in the `cundiweb` proje
 
 **Example**
 ```tsx
-<SharedList resource="my_resource" searchFields={["Name", "Description"]}>
+import { SmartList } from "@cundi/xaf-refine-sdk";
+
+<SmartList resource="my_resource" searchFields={["Name", "Description"]}>
     {/* Action Column: Always visible */}
     <Table.Column title="Actions" dataIndex="actions" render={...} />
 
@@ -241,16 +243,16 @@ This section documents the reusable components available in the `cundiweb` proje
 
     {/* Default Hidden Column */}
     <Table.Column title="Status" dataIndex="Status" />
-</SharedList>
+</SmartList>
 ```
 
-<a id="shareddetaillist"></a>
-### 2. SharedDetailList (Master-Details)
+<a id="relatedlist"></a>
+### 2. RelatedList (Master-Details)
 
-`SharedDetailList` is a generic component to implement Master-Details CRUD functionality (e.g., Order Lines).
+`RelatedList` is a generic component to implement Master-Details CRUD functionality (e.g., Order Lines).
 
 #### Architecture
-1.  **Parent Page**: Uses `<SharedDetailList>`.
+1.  **Parent Page**: Uses `<RelatedList>`.
 2.  **FormFields**: A specific component returning `<Form.Item>`s for the detail object.
 
 #### Usage Steps
@@ -270,7 +272,9 @@ export const YourDetailFormFields: React.FC<{ mode: "create" | "edit" }> = ({ mo
 
 **2. Implementation in Parent Page**
 ```tsx
-<SharedDetailList<IYourDetailInterface>
+import { RelatedList } from "@cundi/xaf-refine-sdk";
+
+<RelatedList<IYourDetailInterface>
     resource="YourDetailResource"   // The resource name in Refine
     masterField="Master"            // The property name linking to the master
     masterId={record?.Oid}          // The ID of the current master record
@@ -280,7 +284,7 @@ export const YourDetailFormFields: React.FC<{ mode: "create" | "edit" }> = ({ mo
     modalTitle="Manage Detail"
 >
     <Table.Column title="Name" dataIndex="Name" />
-</SharedDetailList>
+</RelatedList>
 ```
 
 #### Features
@@ -290,91 +294,47 @@ export const YourDetailFormFields: React.FC<{ mode: "create" | "edit" }> = ({ mo
 
 ---
 
-## Part 4: User & Role Management Implementation
+## Part 4: Backend Support for SDK Features
 
-This section details the implementation of user permissions and role assignment, which involves custom handling beyond standard CRUD.
+The `@cundi/xaf-refine-sdk` handles the complex UI logic for User and Role management, but it relies on specific custom endpoints in the backend to handle OData limitations regarding many-to-many relationships and nested permissions.
 
-### 1. Role Assignment Architecture
+### 1. User Role Assignment (`UserController.cs`)
 
-Standard OData v4 often handles primitive properties easily but requires special handling for many-to-many relationships like `ApplicationUser.Roles` when updating.
+Standard OData v4 PATCH requests struggle with replacing collection properties (like `Roles`) in a single transaction easily.
 
-#### Backend (`UserController.cs`)
-We implemented a custom API endpoint `UpdateUserRoles` because standard OData PATCH requests might not correctly handle the replacement of the entire Roles collection in a single transaction easily without complex OData batching.
-
-**Endpoint:** `POST /api/User/UpdateUserRoles`
+**Required Endpoint:** `POST /api/User/UpdateUserRoles`
 
 **Logic:**
-1.  Accept `UserId` and a list of `RoleIds`.
-2.  Fetch the user and the target roles from the database.
-3.  **Sync Logic**:
-    -   Remove roles present in the user's current list but NOT in the new list.
-    -   Add roles present in the new list but NOT in the user's current list.
-4.  Commit changes.
+1.  Accepts `UserId` and a list of `RoleIds`.
+2.  Fetches the user and target roles.
+3.  Synchronizes the collection (Add/Remove) and commits changes.
 
-#### Frontend (`ApplicationUserEdit` in `edit.tsx`)
-The frontend uses a two-step process to update a user with roles, avoiding "Unsaved Changes" issues and ensuring data consistency.
+The SDK's `ApplicationUserEdit` component automatically calls this endpoint when saving.
 
-1.  **Step 1: Update User Details**: Standard Refine `useForm` hooks update the user's primitive fields (Name, Email, etc.) via OData.
-2.  **Step 2: Update Roles**: We utilize the `onMutationSuccess` callback of `useForm`.
-    -   Inside this callback, we extract the selected `Roles` (array of Oids).
-    -   We make a separate `fetch` call to the custom `UpdateUserRoles` endpoint.
-    -   Upon success, we show a success message using `App.useApp().message`.
+### 2. Type Permissions (`RoleController.cs`)
 
-**Code Pattern:**
-```tsx
-const { formProps } = useForm<IApplicationUser>({
-    meta: {
-        expand: ["Roles"] // Expand to get current roles
-    },
-    onMutationSuccess: async (data, variables) => {
-        // 1. Get Roles from form
-        const roles = form?.getFieldValue("Roles");
-        // 2. Normalize to IDs
-        const roleIds = normalizeRoles(roles);
-        
-        // 3. Call Custom API
-        await fetch(`${import.meta.env.VITE_API_URL}/User/UpdateUserRoles`, { ... });
-    }
-});
+Handling `TypePermissions` involves nested object serialization and complex reconciliation logic.
+
+**Required Configuration (`Startup.cs`):**
+Ensure `PermissionPolicyTypePermissionObject` is registered:
+```csharp
+options.BusinessObject<PermissionPolicyTypePermissionObject>();
 ```
 
-### 2. Frontend Permissions (`accessControlProvider.ts`)
-We use a lightweight permission check on the frontend for UI visibility (hiding menus), while the Backend enforces actual security.
+**Required Endpoint:** `POST /api/Role/UpdateRole`
 
--   **Usage**: The `accessControlProvider` checks this flag to allow/deny access to resources like "Settings", "PermissionPolicyRole", and "ApplicationUser".
+**Logic:**
+1.  Accepts a DTO with role details and the full list of `TypePermissions`.
+2.  Performs server-side reconciliation (identifying added, modified, and deleted permissions).
+3.  Updates the database in a single transaction.
 
-### 3. Type Permissions (Advanced Nested Data)
+The SDK's `RoleEdit` component is pre-configured to transform the form data and call this endpoint, handling the mismatched field names (e.g., `TargetType` vs `TargetTypeFullName`) internally.
 
-Handling `TypePermissions` in Roles presents specific challenges due to the nested nature of the data and XAF OData serialization rules.
+### 3. Dynamic Type Loading (`ModelController.cs`)
 
-#### Backend Challenges & Solutions
+The SDK's permission editor needs to know which Business Objects exist in the system.
 
-1.  **Serialization of Nested Objects**:
-    *   **Issue**: By default, XAF's OData service might not serialze nested collections like `TypePermissions` even if `$expand` is requested, because the type `PermissionPolicyTypePermissionObject` isn't explicitly exposed.
-    *   **Fix**: Register the type in `Startup.cs`:
-        ```csharp
-        options.BusinessObject<PermissionPolicyTypePermissionObject>();
-        ```
+**Required Endpoint:** `GET /api/Model/BusinessObjects`
 
-2.  **Updating Nested Collections**:
-    *   **Issue**: Standard OData PATCH/PUT often struggles with reconciling nested collections (Add/Update/Delete mixed operations).
-    *   **Fix**: Implemented `POST /api/Role/UpdateRole` in `RoleController.cs`. This custom endpoint accepts a DTO with the full list of permissions and handles the reconciliation logic (deleting missing permissions, updating existing ones, adding new ones) on the server side.
-
-#### Frontend Challenges & Solutions (`RoleEdit` in `edit.tsx`)
-
-1.  **Form Context Loss**:
-    *   **Issue**: `Form.List` (used for the dynamic list of permissions) can lose connection to the main `Form` instance when used with `useForm` from `@refinedev/antd` in complex layouts.
-    *   **Fix**: Manually create the form instance `const [form] = Form.useForm()` and pass it to Refine's `useForm` via `formProps`. We also manually handle the `Create` and `Save` actions to ensure the form values, including nested lists, are correctly submitted.
-
-2.  **Data Normalization (Field Mismatch)**:
-    *   **Issue**: XAF OData returns the target type name as `TargetTypeFullName`, but the frontend form and our custom Update API expect `TargetType`.
-    *   **Fix**: In the `useEffect` that loads initial values, we map the fields:
-        ```tsx
-        values.TypePermissions = values.TypePermissions.map((p: any) => ({
-            ...p,
-            TargetType: p.TargetType || p.TargetTypeFullName
-        }));
-        ```
-
-3.  **Dynamic Type Loading**:
-    *   **Feature**: Instead of hardcoding business types, we fetch them dynamically from `api/Model/BusinessObjects` (exposed via `ModelController.cs`) using the `useModelTypes` hook. This ensures the UI always correctly reflects the available system types.
+**Logic:**
+Returns a list of available XAF Business Object types (names and captions) for the frontend dropdowns.

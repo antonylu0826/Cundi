@@ -1,57 +1,57 @@
 # @cundi/xaf-refine-sdk
 
-這是一個整合 XAF 後端與 Refine 前端的 SDK，包含了身分驗證 (Auth Provider)、資料存取 (Data Provider) 的核心邏輯，以及完整的 UI 元件庫。
+This is an SDK integrating XAF backend with Refine frontend, including core logic for Authentication (Auth Provider), Data Access (Data Provider), and a complete UI component library.
 
-## 功能特色
+## Features
 
-- **Auth Provider**: 處理登入、登出、Token 管理、權限檢查。
-- **Data Provider**: 專為 XAF OData 設計的資料存取層。
+- **Auth Provider**: Handles login, logout, Token management, and permission checks.
+- **Data Provider**: Data access layer designed specifically for XAF OData.
 - **UI Components**:
-    - `Header`: 包含使用者選單、主題切換 (Dark/Light Mode) 的應用程式標頭。
-    - `LoginPage`: 標準登入頁面。
-    - `SharedList`, `SharedDetailList`: 高度封裝的通用列表與詳情元件。
-    - `ApplicationUser`: 完整的使用者管理 (列表、新增、編輯、角色分配)。
-    - `PermissionPolicyRole`: 完整的角色與權限管理。
+    - `Header`: Application header including user menu and theme toggle (Dark/Light Mode).
+    - `LoginPage`: Standard login page.
+    - `SmartList`, `RelatedList`: Highly encapsulated generic list and detail components.
+    - `ApplicationUser`: Complete user management (List, Create, Edit, Role Assignment).
+    - `PermissionPolicyRole`: Complete role and permission management.
 
-## 如何在新專案中使用
+## How to use in a new project
 
-### 1. 初始化專案
+### 1. Initialize Project
 
-建議使用官方工具建立標準 Refine + Vite + Ant Design 專案：
+It is recommended to use the official tool to create a standard Refine + Vite + Ant Design project:
 
 ```bash
 npm create refine-app@latest my-project
-# 選項建議：
-# Backend: Custom JSON REST (稍後會換掉)
+# Recommended options:
+# Backend: Custom JSON REST (will be replaced later)
 # UI Framework: Ant Design
-# Authentication: None (稍後使用 SDK)
+# Authentication: None (will use SDK later)
 ```
 
-### 2. 安裝 SDK
+### 2. Install SDK
 
-在您的專案目錄下安裝此 SDK：
+Install this SDK in your project directory:
 
 ```bash
-# 若與 packages 資料夾在同一層級 (monorepo 結構)
+# If in the same level as packages folder (monorepo structure)
 npm install ../packages/xaf-refine-sdk
 
-# 或使用發佈後的套件名稱
+# Or use the published package name
 # npm install @cundi/xaf-refine-sdk
 ```
 
-### 3. 設定環境變數 (.env)
+### 3. Setup Environment Variables (.env)
 
-在專案根目錄建立 `.env` 檔案，指定後端 API 位置。
+Create a `.env` file in the project root directory and specify the backend API location.
 
-> **注意**：SDK 的 `httpClient` (用於 Auth) 預設讀取 `VITE_API_URL`。而 OData 端點通常需要加上 `/odata` 後綴。
+> **Note**: SDK's `httpClient` (used for Auth) defaults to reading `VITE_API_URL`. OData endpoints usually need the `/odata` suffix.
 
 ```env
 VITE_API_URL=https://localhost:7087/api
 ```
 
-### 4. 設定 App.tsx
+### 4. Setup App.tsx
 
-將 `src/App.tsx` 修改為引用 SDK 的元件與邏輯：
+Modify `src/App.tsx` to import components and logic from the SDK:
 
 ```tsx
 import React from "react";
@@ -62,7 +62,7 @@ import { ThemedLayout, ErrorComponent, RefineThemes, useNotificationProvider } f
 import routerProvider, { NavigateToResource, CatchAllNavigate, UnsavedChangesNotifier, DocumentTitleHandler } from "@refinedev/react-router";
 import "@refinedev/antd/dist/reset.css";
 
-// 1. 引入 SDK
+// 1. Import SDK
 import {
     authProvider,
     dataProvider,
@@ -78,7 +78,7 @@ import {
     useColorMode
 } from "@cundi/xaf-refine-sdk";
 
-// 2. 設定 API URL (Auth 用 raw URL, Data 用 /odata)
+// 2. Setup API URL (Raw URL for Auth, /odata for Data)
 const API_URL = import.meta.env.VITE_API_URL;
 
 const InnerApp: React.FC = () => {
@@ -95,7 +95,7 @@ const InnerApp: React.FC = () => {
                 <AntdApp>
                     <Refine
                         authProvider={authProvider}
-                        // 3. 設定 Data Provider (注意加上 /odata)
+                        // 3. Setup Data Provider (Note the /odata suffix)
                         dataProvider={dataProvider(API_URL + "/odata")}
                         routerProvider={routerProvider}
                         notificationProvider={useNotificationProvider}
@@ -133,7 +133,7 @@ const InnerApp: React.FC = () => {
                             >
                                 <Route index element={<div>Welcome to Dashboard</div>} />
                                 
-                                {/* 4. 設定 SDK 提供的頁面 */}
+                                {/* 4. Setup pages provided by SDK */}
                                 <Route path="/ApplicationUsers">
                                     <Route index element={<ApplicationUserList />} />
                                     <Route path="create" element={<ApplicationUserCreate />} />
@@ -177,8 +177,90 @@ const App: React.FC = () => {
 export default App;
 ```
 
-## 開發與發佈
+## Building Custom CRUD Pages
 
-1. **安裝依賴**: `npm install`
-2. **建置 SDK**: `npm run build`
-3. **開發模式**: `npm run dev`
+To create CRUD pages for your own XAF business objects (e.g., `DemoObject`), follow these patterns (reference `cundiweb/src/pages/demo-objects` for complete examples).
+
+### List Page
+
+Use the `SmartList` component to quickly build a feature-rich list view with search capabilities.
+
+```tsx
+import { SmartList } from "@cundi/xaf-refine-sdk";
+import { Table, Checkbox, Space } from "antd";
+import { EditButton, ShowButton, DeleteButton, DateField } from "@refinedev/antd";
+
+export const DemoObjectList = () => {
+    return (
+        // searchFields prop enables the search bar for specified columns
+        <SmartList searchFields={["Name", "StringValue"]}>
+            <Table.Column dataIndex="Name" title="Name" sorter defaultVisible />
+            <Table.Column dataIndex="StringValue" title="String Value" sorter />
+            <Table.Column 
+                dataIndex="BoolValue" 
+                title="Boolean" 
+                render={(value) => <Checkbox checked={value} disabled />} 
+            />
+            {/* Standard Ant Design Table.Column configuration */}
+            <Table.Column
+                title="Actions"
+                dataIndex="actions"
+                render={(_, record) => (
+                    <Space>
+                        <EditButton hideText size="small" recordItemId={record.Oid} />
+                        <ShowButton hideText size="small" recordItemId={record.Oid} />
+                        <DeleteButton hideText size="small" recordItemId={record.Oid} />
+                    </Space>
+                )}
+            />
+        </SmartList>
+    );
+};
+```
+
+### Create/Edit Page
+
+Use standard Refine hooks (`useForm`) combined with Ant Design Form components. For file uploads (like Images), use the `Base64Upload` component provided by the SDK.
+
+```tsx
+import { Create, useForm } from "@refinedev/antd"; // or Edit
+import { Base64Upload } from "@cundi/xaf-refine-sdk";
+import { Form, Input, Switch } from "antd";
+
+export const DemoObjectCreate = () => {
+    const { formProps, saveButtonProps } = useForm();
+
+    return (
+        <Create saveButtonProps={saveButtonProps}>
+            <Form {...formProps} layout="vertical">
+                <Form.Item
+                    label="Name"
+                    name={["Name"]}
+                    rules={[{ required: true }]}
+                >
+                    <Input />
+                </Form.Item>
+                
+                {/* Image upload example */}
+                <Form.Item label="Image" name={["ImageValue"]}>
+                    <Base64Upload />
+                </Form.Item>
+
+                <Form.Item 
+                    label="Active" 
+                    name={["Active"]} 
+                    valuePropName="checked"
+                >
+                    <Switch />
+                </Form.Item>
+            </Form>
+        </Create>
+    );
+};
+```
+
+## Development and Publishing
+
+1. **Install Dependencies**: `npm install`
+2. **Build SDK**: `npm run build`
+3. **Development Mode**: `npm run dev`
