@@ -11,6 +11,7 @@ export interface IDemoObject {
     ImageValue: string;
     LongStringValue?: string;
     BoolValue: boolean;
+    TiptapValue?: string;
     DemoDetails?: IDemoDetail[];
 }
 

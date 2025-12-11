@@ -10,6 +10,7 @@ This is an SDK integrating XAF backend with Refine frontend, including core logi
     - `Header`: Application header including user menu and theme toggle (Dark/Light Mode).
     - `LoginPage`: Standard login page.
     - `SmartList`, `RelatedList`: Highly encapsulated generic list and detail components.
+    - `TiptapEditor`: Rich text editor with support for Images, Tables, Tasks, Math (LaTeX), YouTube, Emoji, Highlight, and Text Color.
     - `ApplicationUser`: Complete user management (List, Create, Edit, Role Assignment).
     - `PermissionPolicyRole`: Complete role and permission management.
 

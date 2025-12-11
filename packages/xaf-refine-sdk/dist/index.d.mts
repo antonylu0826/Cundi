@@ -98,6 +98,13 @@ interface Base64UploadProps {
 }
 declare const Base64Upload: React.FC<Base64UploadProps>;
 
+interface TiptapEditorProps {
+    value?: string;
+    onChange?: (value: string) => void;
+    disabled?: boolean;
+}
+declare const TiptapEditor: React.FC<TiptapEditorProps>;
+
 declare const LoginPage: React.FC;
 
 declare const ApplicationUserList: React.FC<IResourceComponentsProps>;
@@ -130,4 +137,4 @@ interface IModelType {
 }
 declare const useModelTypes: () => _tanstack_react_query.UseQueryResult<IModelType[], unknown>;
 
-export { ApplicationUserCreate, ApplicationUserEdit, ApplicationUserList, Base64Upload, ColorModeContext, ColorModeContextProvider, Header, HttpError, type IApplicationUser, type IModelType, type IPermissionPolicyRole, type IPermissionPolicyTypePermissionObject, LoginPage, RelatedList, type RequestOptions, RoleCreate, RoleEdit, RoleList, SecurityPermissionPolicy, SecurityPermissionState, SmartList, TOKEN_KEY, authProvider, authService, dataProvider, getBaseUrl, httpClient, parseJwt, useColorMode, useModelTypes };
+export { ApplicationUserCreate, ApplicationUserEdit, ApplicationUserList, Base64Upload, ColorModeContext, ColorModeContextProvider, Header, HttpError, type IApplicationUser, type IModelType, type IPermissionPolicyRole, type IPermissionPolicyTypePermissionObject, LoginPage, RelatedList, type RequestOptions, RoleCreate, RoleEdit, RoleList, SecurityPermissionPolicy, SecurityPermissionState, SmartList, TOKEN_KEY, TiptapEditor, type TiptapEditorProps, authProvider, authService, dataProvider, getBaseUrl, httpClient, parseJwt, useColorMode, useModelTypes };

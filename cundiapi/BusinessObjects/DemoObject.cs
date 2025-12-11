@@ -81,6 +81,14 @@ public class DemoObject : BaseObject
     {
         get { return GetCollection<DemoDetail>(nameof(DemoDetails)); }
     }
+
+    private string _TiptapValue;
+    [Size(SizeAttribute.Unlimited)]
+    public string TiptapValue
+    {
+        get { return _TiptapValue; }
+        set { SetPropertyValue<string>(nameof(TiptapValue), ref _TiptapValue, value); }
+    }
 }
 
 public class DemoDetail : BaseObject

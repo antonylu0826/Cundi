@@ -10,6 +10,7 @@ export * from "./components/Header";
 export * from "./components/SmartList";
 export * from "./components/RelatedList";
 export * from "./components/Base64Upload";
+export * from "./components/TiptapEditor";
 
 // Pages
 export * from "./pages/login";

@@ -51,6 +51,9 @@ export const DemoObjectShow = () => {
             <Title level={5}>Long String</Title>
             <TextField value={record?.LongStringValue} />
 
+            <Title level={5}>Tiptap Content</Title>
+            <div dangerouslySetInnerHTML={{ __html: record?.TiptapValue ?? "" }} />
+
             <div style={{ marginTop: 24, marginBottom: 8 }}>
                 <Title level={4} style={{ margin: 0, marginBottom: 16 }}>Demo Details</Title>
 

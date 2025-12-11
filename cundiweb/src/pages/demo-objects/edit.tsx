@@ -1,5 +1,5 @@
 import { Edit, useForm } from "@refinedev/antd";
-import { Base64Upload } from "@cundi/xaf-refine-sdk";
+import { Base64Upload, TiptapEditor } from "@cundi/xaf-refine-sdk";
 import { Form, Input, InputNumber, Select, DatePicker, Upload, Switch } from "antd";
 import { IDemoObject, DemoObjectEnum } from "../../interfaces";
 import dayjs from "dayjs";
@@ -65,6 +65,12 @@ export const DemoObjectEdit = () => {
                     name={["LongStringValue"]}
                 >
                     <Input.TextArea rows={4} />
+                </Form.Item>
+                <Form.Item
+                    label="Tiptap Content"
+                    name={["TiptapValue"]}
+                >
+                    <TiptapEditor />
                 </Form.Item>
                 <Form.Item
                     label="Boolean Value"
