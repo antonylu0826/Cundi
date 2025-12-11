@@ -1,4 +1,4 @@
-# Cundi (繁體中文)
+# Cundi
 
 Cundi 是一個結合了強大 .NET 後端與響應式 React 前端的現代化全端應用程式。
 
