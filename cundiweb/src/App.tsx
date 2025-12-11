@@ -30,8 +30,7 @@ import "@ant-design/v5-patch-for-react-19";
 import "@refinedev/antd/dist/reset.css";
 
 import { DashboardPage } from "../src/pages/dashboard";
-import { authProvider } from "./authProvider";
-import { dataProvider } from "./odataProvider";
+import { authProvider, dataProvider } from "@cundi/xaf-refine-sdk";
 import {
   DemoObjectList,
   DemoObjectCreate,

@@ -1,0 +1,44 @@
+{
+    "name": "@cundi/xaf-refine-sdk",
+    "version": "1.0.0",
+    "description": "Integration SDK for XAF backend and Refine frontend",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsup src/index.ts --format cjs,esm --dts",
+        "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
+    },
+    "keywords": [
+        "refine",
+        "xaf",
+        "integration"
+    ],
+    "author": "Cundi",
+    "license": "ISC",
+    "peerDependencies": {
+        "@ant-design/icons": "^5.0.0",
+        "@refinedev/antd": "^5.0.0",
+        "@refinedev/core": "^4.0.0",
+        "@tanstack/react-query": "^4.0.0",
+        "antd": "^5.0.0",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "react-router": "^6.0.0",
+        "react-router-dom": "^6.0.0"
+    },
+    "devDependencies": {
+        "@ant-design/icons": "^5.0.0",
+        "@refinedev/antd": "^5.0.0",
+        "@refinedev/core": "^4.0.0",
+        "@tanstack/react-query": "^4.0.0",
+        "@types/node": "^25.0.0",
+        "antd": "^5.0.0",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "react-router": "^6.0.0",
+        "react-router-dom": "^6.0.0",
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0"
+    }
+}
