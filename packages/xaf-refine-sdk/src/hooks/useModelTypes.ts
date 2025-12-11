@@ -19,11 +19,15 @@ export const useModelTypes = () => {
             if (!response) return [];
             const data = await response.json();
 
-            // Normalize data to ensure it has Label/Value if needed or just return as is
+            // API returns { Label: string, Value: string }
+            // We map this to our internal interface
             return data.map((item: any) => ({
-                ...item,
-                Label: item.Caption,
-                Value: item.Name
+                Name: item.Value,
+                Caption: item.Label,
+                IsCreatable: true, // Defaulting to true as API doesn't return this yet
+                IsDeprecated: false, // Defaulting to false as API doesn't return this yet
+                Label: item.Label,
+                Value: item.Value
             }));
         },
         staleTime: Infinity,

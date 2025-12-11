@@ -5,7 +5,7 @@ import {
     useTable,
 } from "@refinedev/antd";
 import { Table, Form, Input, Popover, Checkbox, Button, Space } from "antd";
-import { SettingOutlined, ReloadOutlined } from "@ant-design/icons";
+import { SettingOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { BaseRecord, HttpError, CrudFilters } from "@refinedev/core";
 
 
@@ -134,11 +134,28 @@ export const SmartList = <T extends BaseRecord = BaseRecord>({
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
                 <Form {...searchFormProps} layout="inline">
                     <Form.Item name="search">
-                        <Input.Search
+                        <Input
                             placeholder="Search..."
                             style={{ width: 300 }}
                             allowClear
-                            onSearch={(value) => {
+                            suffix={
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<SearchOutlined />}
+                                    style={{ border: 0, background: 'transparent', margin: 0, height: 24, width: 24 }}
+                                    onClick={() => {
+                                        const value = searchFormProps.form?.getFieldValue("search");
+                                        if (!value) {
+                                            window.location.search = "";
+                                        } else {
+                                            searchFormProps.onFinish?.({ search: value });
+                                        }
+                                    }}
+                                />
+                            }
+                            onPressEnter={(e) => {
+                                const value = e.currentTarget.value;
                                 if (!value) {
                                     window.location.search = "";
                                 } else {

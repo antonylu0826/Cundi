@@ -355,6 +355,10 @@ var dataProvider = (apiUrl) => ({
         if ("field" in filter) {
           const { field, operator, value } = filter;
           if (operator === "eq") {
+            const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value?.toString());
+            if (isGuid) {
+              return `${field} eq ${value}`;
+            }
             return `${field} eq '${value}'`;
           }
           if (operator === "contains") {
@@ -412,19 +416,6 @@ var dataProvider = (apiUrl) => ({
     return { data };
   },
   update: async ({ resource, id, variables }) => {
-    if (resource === "PermissionPolicyRole") {
-      const apiBase = apiUrl.endsWith("/odata") ? apiUrl.substring(0, apiUrl.length - 6) : apiUrl;
-      const response2 = await httpClient(`${apiBase}/Role/UpdateRole`, {
-        method: "POST",
-        body: JSON.stringify({ ...variables, Oid: id })
-      });
-      if (!response2) throw new Error("Update failed with no response");
-      try {
-        await response2.json();
-      } catch {
-      }
-      return { data: { ...variables, id } };
-    }
     const response = await httpClient(`${apiUrl}/${resource}(${id})`, {
       method: "PATCH",
       body: JSON.stringify(variables)
@@ -813,12 +804,30 @@ var SmartList = ({
     return child;
   });
   return /* @__PURE__ */ import_react4.default.createElement(import_antd5.List, null, /* @__PURE__ */ import_react4.default.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: 20 } }, /* @__PURE__ */ import_react4.default.createElement(import_antd6.Form, { ...searchFormProps, layout: "inline" }, /* @__PURE__ */ import_react4.default.createElement(import_antd6.Form.Item, { name: "search" }, /* @__PURE__ */ import_react4.default.createElement(
-    import_antd6.Input.Search,
+    import_antd6.Input,
     {
       placeholder: "Search...",
       style: { width: 300 },
       allowClear: true,
-      onSearch: (value) => {
+      suffix: /* @__PURE__ */ import_react4.default.createElement(
+        import_antd6.Button,
+        {
+          type: "text",
+          size: "small",
+          icon: /* @__PURE__ */ import_react4.default.createElement(import_icons2.SearchOutlined, null),
+          style: { border: 0, background: "transparent", margin: 0, height: 24, width: 24 },
+          onClick: () => {
+            const value = searchFormProps.form?.getFieldValue("search");
+            if (!value) {
+              window.location.search = "";
+            } else {
+              searchFormProps.onFinish?.({ search: value });
+            }
+          }
+        }
+      ),
+      onPressEnter: (e) => {
+        const value = e.currentTarget.value;
         if (!value) {
           window.location.search = "";
         } else {
@@ -846,10 +855,12 @@ var DetailModal = ({
   const { modalProps, formProps } = modalForm;
   const { form } = formProps;
   import_react5.default.useEffect(() => {
-    if (masterId && form) {
-      form.setFieldValue([masterField, "Oid"], masterId);
+    if (modalProps.open && masterId && form) {
+      form.setFieldsValue({
+        [masterField]: { Oid: masterId }
+      });
     }
-  }, [masterId, form, masterField]);
+  }, [masterId, masterField, modalProps.open]);
   return /* @__PURE__ */ import_react5.default.createElement(
     import_antd7.Modal,
     {
@@ -19090,12 +19101,13 @@ var RoleList = () => {
 
 // src/pages/roles/create.tsx
 var import_react14 = __toESM(require("react"));
-var import_antd21 = require("@refinedev/antd");
-var import_antd22 = require("antd");
+var import_antd22 = require("@refinedev/antd");
+var import_antd23 = require("antd");
 
 // src/pages/roles/TypePermissionList.tsx
 var import_react13 = __toESM(require("react"));
 var import_antd20 = require("antd");
+var import_antd21 = require("@refinedev/antd");
 
 // src/hooks/useModelTypes.ts
 var import_react_query = require("@tanstack/react-query");
@@ -19107,9 +19119,14 @@ var useModelTypes = () => {
       if (!response) return [];
       const data = await response.json();
       return data.map((item) => ({
-        ...item,
-        Label: item.Caption,
-        Value: item.Name
+        Name: item.Value,
+        Caption: item.Label,
+        IsCreatable: true,
+        // Defaulting to true as API doesn't return this yet
+        IsDeprecated: false,
+        // Defaulting to false as API doesn't return this yet
+        Label: item.Label,
+        Value: item.Value
       }));
     },
     staleTime: Infinity
@@ -19117,44 +19134,82 @@ var useModelTypes = () => {
 };
 
 // src/pages/roles/TypePermissionList.tsx
-var TypePermissionList = ({ dataSource }) => {
-  const { data: modelTypes } = useModelTypes();
-  const typeOptions = modelTypes?.filter((t) => t.IsCreatable && !t.IsDeprecated).map((t) => ({ label: t.Caption, value: t.Name })) || [];
-  const PermissionSelect = () => /* @__PURE__ */ import_react13.default.createElement(
-    import_antd20.Select,
+var PermissionSelect = (props) => /* @__PURE__ */ import_react13.default.createElement(
+  import_antd20.Select,
+  {
+    ...props,
+    allowClear: true,
+    options: [
+      { label: "Allow", value: "Allow" /* Allow */ },
+      { label: "Deny", value: "Deny" /* Deny */ }
+    ]
+  }
+);
+var TypePermissionFormFields = ({ typeOptions }) => {
+  return /* @__PURE__ */ import_react13.default.createElement(import_react13.default.Fragment, null, /* @__PURE__ */ import_react13.default.createElement(
+    import_antd20.Form.Item,
     {
-      allowClear: true,
-      options: [
-        { label: "Allow", value: "Allow" /* Allow */ },
-        { label: "Deny", value: "Deny" /* Deny */ }
+      label: "Target Type",
+      name: "TargetTypeFullName",
+      rules: [{ required: true }]
+    },
+    /* @__PURE__ */ import_react13.default.createElement(
+      import_antd20.Select,
+      {
+        showSearch: true,
+        options: typeOptions,
+        filterOption: (input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+      }
+    )
+  ), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Read State", name: "ReadState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Write State", name: "WriteState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Create State", name: "CreateState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Delete State", name: "DeleteState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Navigate State", name: "NavigateState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)));
+};
+var TypePermissionList = ({ masterId }) => {
+  const { data: modelTypes } = useModelTypes();
+  const { tableProps, tableQueryResult } = (0, import_antd21.useTable)({
+    resource: "PermissionPolicyTypePermissionObject",
+    filters: {
+      permanent: [
+        { field: "Role/Oid", operator: "eq", value: masterId || "" }
       ]
+    },
+    syncWithLocation: false,
+    // Prevent URL conflict with parent
+    queryOptions: {
+      enabled: !!masterId
+    },
+    pagination: {
+      mode: "off"
     }
-  );
+  });
+  const typeOptions = import_react13.default.useMemo(() => modelTypes?.filter((t) => t.IsCreatable && !t.IsDeprecated).map((t) => ({ label: t.Caption, value: t.Name })) || [], [modelTypes]);
+  const FormFieldsWrapper = import_react13.default.useMemo(() => {
+    return ({ mode }) => /* @__PURE__ */ import_react13.default.createElement(TypePermissionFormFields, { typeOptions });
+  }, [typeOptions]);
+  const dataSource = import_react13.default.useMemo(() => {
+    return (tableProps.dataSource || []).map((p) => ({
+      ...p,
+      TargetType: p.TargetType || p.TargetTypeFullName || ""
+    }));
+  }, [tableProps.dataSource]);
   return /* @__PURE__ */ import_react13.default.createElement(
     RelatedList,
     {
-      resource: "PermissionPolicyTypePermissions",
+      resource: "PermissionPolicyTypePermissionObject",
       masterField: "Role",
+      masterId,
       dataSource,
+      onMutationSuccess: () => tableQueryResult?.refetch(),
       modalTitle: "Type Permission",
-      FormFields: ({ mode }) => /* @__PURE__ */ import_react13.default.createElement(import_react13.default.Fragment, null, /* @__PURE__ */ import_react13.default.createElement(
-        import_antd20.Form.Item,
-        {
-          label: "Target Type",
-          name: "TargetType",
-          rules: [{ required: true }]
-        },
-        /* @__PURE__ */ import_react13.default.createElement(
-          import_antd20.Select,
-          {
-            showSearch: true,
-            options: typeOptions,
-            filterOption: (input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-          }
-        )
-      ), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Read State", name: "ReadState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Write State", name: "WriteState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Create State", name: "CreateState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Delete State", name: "DeleteState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Navigate State", name: "NavigateState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)))
+      FormFields: FormFieldsWrapper
     },
-    /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "TargetType", title: "Target Type" }),
+    /* @__PURE__ */ import_react13.default.createElement(
+      import_antd20.Table.Column,
+      {
+        dataIndex: "TargetType",
+        title: "Target Type",
+        render: (value) => typeOptions.find((t) => t.value === value)?.label || value
+      }
+    ),
     /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "ReadState", title: "Read" }),
     /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "WriteState", title: "Write" }),
     /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "CreateState", title: "Create" }),
@@ -19165,13 +19220,13 @@ var TypePermissionList = ({ dataSource }) => {
 
 // src/pages/roles/create.tsx
 var RoleCreate = () => {
-  const [form] = import_antd22.Form.useForm();
-  const { formProps, saveButtonProps } = (0, import_antd21.useForm)();
+  const [form] = import_antd23.Form.useForm();
+  const { formProps, saveButtonProps } = (0, import_antd22.useForm)();
   const handleSave = () => {
     form.submit();
   };
-  return /* @__PURE__ */ import_react14.default.createElement(import_antd21.Create, { saveButtonProps: { ...saveButtonProps, onClick: handleSave } }, /* @__PURE__ */ import_react14.default.createElement(
-    import_antd22.Form,
+  return /* @__PURE__ */ import_react14.default.createElement(import_antd22.Create, { saveButtonProps: { ...saveButtonProps, onClick: handleSave } }, /* @__PURE__ */ import_react14.default.createElement(
+    import_antd23.Form,
     {
       ...formProps,
       form,
@@ -19181,25 +19236,25 @@ var RoleCreate = () => {
       }
     },
     /* @__PURE__ */ import_react14.default.createElement(
-      import_antd22.Form.Item,
+      import_antd23.Form.Item,
       {
         label: "Name",
         name: "Name",
         rules: [{ required: true }]
       },
-      /* @__PURE__ */ import_react14.default.createElement(import_antd22.Input, null)
+      /* @__PURE__ */ import_react14.default.createElement(import_antd23.Input, null)
     ),
     /* @__PURE__ */ import_react14.default.createElement(
-      import_antd22.Form.Item,
+      import_antd23.Form.Item,
       {
         label: "Is Administrative",
         name: "IsAdministrative",
         valuePropName: "checked"
       },
-      /* @__PURE__ */ import_react14.default.createElement(import_antd22.Checkbox, null, "Is Administrative")
+      /* @__PURE__ */ import_react14.default.createElement(import_antd23.Checkbox, null, "Is Administrative")
     ),
     /* @__PURE__ */ import_react14.default.createElement(
-      import_antd22.Form.Item,
+      import_antd23.Form.Item,
       {
         label: "Permission Policy",
         name: "PermissionPolicy",
@@ -19207,7 +19262,7 @@ var RoleCreate = () => {
         rules: [{ required: true }]
       },
       /* @__PURE__ */ import_react14.default.createElement(
-        import_antd22.Select,
+        import_antd23.Select,
         {
           options: [
             { label: "Deny All By Default", value: "DenyAllByDefault" /* DenyAllByDefault */ },
@@ -19223,69 +19278,50 @@ var RoleCreate = () => {
 
 // src/pages/roles/edit.tsx
 var import_react15 = __toESM(require("react"));
-var import_antd23 = require("@refinedev/antd");
-var import_antd24 = require("antd");
+var import_antd24 = require("@refinedev/antd");
+var import_antd25 = require("antd");
 var RoleEdit = () => {
-  const [form] = import_antd24.Form.useForm();
-  const { formProps, saveButtonProps } = (0, import_antd23.useForm)({
-    meta: {
-      expand: [
-        { field: "TypePermissions" }
-      ]
-    }
-  });
+  const { formProps, saveButtonProps, id } = (0, import_antd24.useForm)();
   const handleSave = () => {
-    form.submit();
+    formProps.form?.submit();
   };
-  import_react15.default.useEffect(() => {
-    if (formProps.initialValues) {
-      const values = { ...formProps.initialValues };
-      if (values.TypePermissions) {
-        values.TypePermissions = values.TypePermissions.map((p) => ({
-          ...p,
-          TargetType: p.TargetType || p.TargetTypeFullName || ""
-        }));
-      }
-      form.setFieldsValue(values);
-    }
-  }, [formProps.initialValues]);
-  return /* @__PURE__ */ import_react15.default.createElement(import_antd23.Edit, { saveButtonProps: { ...saveButtonProps, onClick: handleSave } }, /* @__PURE__ */ import_react15.default.createElement(
-    import_antd24.Form,
+  return /* @__PURE__ */ import_react15.default.createElement(import_antd24.Edit, { saveButtonProps: { ...saveButtonProps, onClick: handleSave } }, /* @__PURE__ */ import_react15.default.createElement(
+    import_antd25.Form,
     {
       ...formProps,
-      form,
       layout: "vertical",
       onFinish: (values) => {
-        return formProps.onFinish && formProps.onFinish(values);
+        const { TypePermissions, ...rest } = values;
+        return formProps.onFinish && formProps.onFinish(rest);
       }
     },
     /* @__PURE__ */ import_react15.default.createElement(
-      import_antd24.Form.Item,
+      import_antd25.Form.Item,
       {
         label: "Name",
         name: "Name",
         rules: [{ required: true }]
       },
-      /* @__PURE__ */ import_react15.default.createElement(import_antd24.Input, null)
+      /* @__PURE__ */ import_react15.default.createElement(import_antd25.Input, null)
     ),
     /* @__PURE__ */ import_react15.default.createElement(
-      import_antd24.Form.Item,
+      import_antd25.Form.Item,
       {
         label: "Is Administrative",
         name: "IsAdministrative",
         valuePropName: "checked"
       },
-      /* @__PURE__ */ import_react15.default.createElement(import_antd24.Checkbox, null, "Is Administrative")
+      /* @__PURE__ */ import_react15.default.createElement(import_antd25.Checkbox, null, "Is Administrative")
     ),
     /* @__PURE__ */ import_react15.default.createElement(
-      import_antd24.Form.Item,
+      import_antd25.Form.Item,
       {
         label: "Permission Policy",
         name: "PermissionPolicy",
         rules: [{ required: true }]
       },
       /* @__PURE__ */ import_react15.default.createElement(
-        import_antd24.Select,
+        import_antd25.Select,
         {
           options: [
             { label: "Deny All By Default", value: "DenyAllByDefault" /* DenyAllByDefault */ },
@@ -19295,7 +19331,12 @@ var RoleEdit = () => {
         }
       )
     ),
-    /* @__PURE__ */ import_react15.default.createElement(TypePermissionList, null)
+    /* @__PURE__ */ import_react15.default.createElement(
+      TypePermissionList,
+      {
+        masterId: id?.toString()
+      }
+    )
   ));
 };
 // Annotate the CommonJS export names for ESM import in node:

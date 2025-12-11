@@ -295,6 +295,10 @@ var dataProvider = (apiUrl) => ({
         if ("field" in filter) {
           const { field, operator, value } = filter;
           if (operator === "eq") {
+            const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value?.toString());
+            if (isGuid) {
+              return `${field} eq ${value}`;
+            }
             return `${field} eq '${value}'`;
           }
           if (operator === "contains") {
@@ -352,19 +356,6 @@ var dataProvider = (apiUrl) => ({
     return { data };
   },
   update: async ({ resource, id, variables }) => {
-    if (resource === "PermissionPolicyRole") {
-      const apiBase = apiUrl.endsWith("/odata") ? apiUrl.substring(0, apiUrl.length - 6) : apiUrl;
-      const response2 = await httpClient(`${apiBase}/Role/UpdateRole`, {
-        method: "POST",
-        body: JSON.stringify({ ...variables, Oid: id })
-      });
-      if (!response2) throw new Error("Update failed with no response");
-      try {
-        await response2.json();
-      } catch {
-      }
-      return { data: { ...variables, id } };
-    }
     const response = await httpClient(`${apiUrl}/${resource}(${id})`, {
       method: "PATCH",
       body: JSON.stringify(variables)
@@ -674,7 +665,7 @@ import {
   useTable
 } from "@refinedev/antd";
 import { Table, Form as Form2, Input as Input2, Popover, Checkbox, Button as Button2, Space as Space2 } from "antd";
-import { SettingOutlined, ReloadOutlined } from "@ant-design/icons";
+import { SettingOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 var SmartList = ({
   children,
   resource,
@@ -761,12 +752,30 @@ var SmartList = ({
     return child;
   });
   return /* @__PURE__ */ React4.createElement(List, null, /* @__PURE__ */ React4.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: 20 } }, /* @__PURE__ */ React4.createElement(Form2, { ...searchFormProps, layout: "inline" }, /* @__PURE__ */ React4.createElement(Form2.Item, { name: "search" }, /* @__PURE__ */ React4.createElement(
-    Input2.Search,
+    Input2,
     {
       placeholder: "Search...",
       style: { width: 300 },
       allowClear: true,
-      onSearch: (value) => {
+      suffix: /* @__PURE__ */ React4.createElement(
+        Button2,
+        {
+          type: "text",
+          size: "small",
+          icon: /* @__PURE__ */ React4.createElement(SearchOutlined, null),
+          style: { border: 0, background: "transparent", margin: 0, height: 24, width: 24 },
+          onClick: () => {
+            const value = searchFormProps.form?.getFieldValue("search");
+            if (!value) {
+              window.location.search = "";
+            } else {
+              searchFormProps.onFinish?.({ search: value });
+            }
+          }
+        }
+      ),
+      onPressEnter: (e) => {
+        const value = e.currentTarget.value;
         if (!value) {
           window.location.search = "";
         } else {
@@ -794,10 +803,12 @@ var DetailModal = ({
   const { modalProps, formProps } = modalForm;
   const { form } = formProps;
   React5.useEffect(() => {
-    if (masterId && form) {
-      form.setFieldValue([masterField, "Oid"], masterId);
+    if (modalProps.open && masterId && form) {
+      form.setFieldsValue({
+        [masterField]: { Oid: masterId }
+      });
     }
-  }, [masterId, form, masterField]);
+  }, [masterId, masterField, modalProps.open]);
   return /* @__PURE__ */ React5.createElement(
     Modal2,
     {
@@ -19075,6 +19086,7 @@ import { Form as Form9, Input as Input8, Checkbox as Checkbox7, Select as Select
 // src/pages/roles/TypePermissionList.tsx
 import React12 from "react";
 import { Form as Form8, Select as Select2, Table as Table6 } from "antd";
+import { useTable as useTable3 } from "@refinedev/antd";
 
 // src/hooks/useModelTypes.ts
 import { useQuery } from "@tanstack/react-query";
@@ -19086,9 +19098,14 @@ var useModelTypes = () => {
       if (!response) return [];
       const data = await response.json();
       return data.map((item) => ({
-        ...item,
-        Label: item.Caption,
-        Value: item.Name
+        Name: item.Value,
+        Caption: item.Label,
+        IsCreatable: true,
+        // Defaulting to true as API doesn't return this yet
+        IsDeprecated: false,
+        // Defaulting to false as API doesn't return this yet
+        Label: item.Label,
+        Value: item.Value
       }));
     },
     staleTime: Infinity
@@ -19096,44 +19113,82 @@ var useModelTypes = () => {
 };
 
 // src/pages/roles/TypePermissionList.tsx
-var TypePermissionList = ({ dataSource }) => {
-  const { data: modelTypes } = useModelTypes();
-  const typeOptions = modelTypes?.filter((t) => t.IsCreatable && !t.IsDeprecated).map((t) => ({ label: t.Caption, value: t.Name })) || [];
-  const PermissionSelect = () => /* @__PURE__ */ React12.createElement(
-    Select2,
+var PermissionSelect = (props) => /* @__PURE__ */ React12.createElement(
+  Select2,
+  {
+    ...props,
+    allowClear: true,
+    options: [
+      { label: "Allow", value: "Allow" /* Allow */ },
+      { label: "Deny", value: "Deny" /* Deny */ }
+    ]
+  }
+);
+var TypePermissionFormFields = ({ typeOptions }) => {
+  return /* @__PURE__ */ React12.createElement(React12.Fragment, null, /* @__PURE__ */ React12.createElement(
+    Form8.Item,
     {
-      allowClear: true,
-      options: [
-        { label: "Allow", value: "Allow" /* Allow */ },
-        { label: "Deny", value: "Deny" /* Deny */ }
+      label: "Target Type",
+      name: "TargetTypeFullName",
+      rules: [{ required: true }]
+    },
+    /* @__PURE__ */ React12.createElement(
+      Select2,
+      {
+        showSearch: true,
+        options: typeOptions,
+        filterOption: (input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+      }
+    )
+  ), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Read State", name: "ReadState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Write State", name: "WriteState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Create State", name: "CreateState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Delete State", name: "DeleteState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Navigate State", name: "NavigateState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)));
+};
+var TypePermissionList = ({ masterId }) => {
+  const { data: modelTypes } = useModelTypes();
+  const { tableProps, tableQueryResult } = useTable3({
+    resource: "PermissionPolicyTypePermissionObject",
+    filters: {
+      permanent: [
+        { field: "Role/Oid", operator: "eq", value: masterId || "" }
       ]
+    },
+    syncWithLocation: false,
+    // Prevent URL conflict with parent
+    queryOptions: {
+      enabled: !!masterId
+    },
+    pagination: {
+      mode: "off"
     }
-  );
+  });
+  const typeOptions = React12.useMemo(() => modelTypes?.filter((t) => t.IsCreatable && !t.IsDeprecated).map((t) => ({ label: t.Caption, value: t.Name })) || [], [modelTypes]);
+  const FormFieldsWrapper = React12.useMemo(() => {
+    return ({ mode }) => /* @__PURE__ */ React12.createElement(TypePermissionFormFields, { typeOptions });
+  }, [typeOptions]);
+  const dataSource = React12.useMemo(() => {
+    return (tableProps.dataSource || []).map((p) => ({
+      ...p,
+      TargetType: p.TargetType || p.TargetTypeFullName || ""
+    }));
+  }, [tableProps.dataSource]);
   return /* @__PURE__ */ React12.createElement(
     RelatedList,
     {
-      resource: "PermissionPolicyTypePermissions",
+      resource: "PermissionPolicyTypePermissionObject",
       masterField: "Role",
+      masterId,
       dataSource,
+      onMutationSuccess: () => tableQueryResult?.refetch(),
       modalTitle: "Type Permission",
-      FormFields: ({ mode }) => /* @__PURE__ */ React12.createElement(React12.Fragment, null, /* @__PURE__ */ React12.createElement(
-        Form8.Item,
-        {
-          label: "Target Type",
-          name: "TargetType",
-          rules: [{ required: true }]
-        },
-        /* @__PURE__ */ React12.createElement(
-          Select2,
-          {
-            showSearch: true,
-            options: typeOptions,
-            filterOption: (input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-          }
-        )
-      ), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Read State", name: "ReadState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Write State", name: "WriteState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Create State", name: "CreateState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Delete State", name: "DeleteState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Navigate State", name: "NavigateState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)))
+      FormFields: FormFieldsWrapper
     },
-    /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "TargetType", title: "Target Type" }),
+    /* @__PURE__ */ React12.createElement(
+      Table6.Column,
+      {
+        dataIndex: "TargetType",
+        title: "Target Type",
+        render: (value) => typeOptions.find((t) => t.value === value)?.label || value
+      }
+    ),
     /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "ReadState", title: "Read" }),
     /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "WriteState", title: "Write" }),
     /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "CreateState", title: "Create" }),
@@ -19205,37 +19260,18 @@ import React14 from "react";
 import { Edit as Edit2, useForm as useForm4 } from "@refinedev/antd";
 import { Form as Form10, Input as Input9, Checkbox as Checkbox8, Select as Select4 } from "antd";
 var RoleEdit = () => {
-  const [form] = Form10.useForm();
-  const { formProps, saveButtonProps } = useForm4({
-    meta: {
-      expand: [
-        { field: "TypePermissions" }
-      ]
-    }
-  });
+  const { formProps, saveButtonProps, id } = useForm4();
   const handleSave = () => {
-    form.submit();
+    formProps.form?.submit();
   };
-  React14.useEffect(() => {
-    if (formProps.initialValues) {
-      const values = { ...formProps.initialValues };
-      if (values.TypePermissions) {
-        values.TypePermissions = values.TypePermissions.map((p) => ({
-          ...p,
-          TargetType: p.TargetType || p.TargetTypeFullName || ""
-        }));
-      }
-      form.setFieldsValue(values);
-    }
-  }, [formProps.initialValues]);
   return /* @__PURE__ */ React14.createElement(Edit2, { saveButtonProps: { ...saveButtonProps, onClick: handleSave } }, /* @__PURE__ */ React14.createElement(
     Form10,
     {
       ...formProps,
-      form,
       layout: "vertical",
       onFinish: (values) => {
-        return formProps.onFinish && formProps.onFinish(values);
+        const { TypePermissions, ...rest } = values;
+        return formProps.onFinish && formProps.onFinish(rest);
       }
     },
     /* @__PURE__ */ React14.createElement(
@@ -19274,7 +19310,12 @@ var RoleEdit = () => {
         }
       )
     ),
-    /* @__PURE__ */ React14.createElement(TypePermissionList, null)
+    /* @__PURE__ */ React14.createElement(
+      TypePermissionList,
+      {
+        masterId: id?.toString()
+      }
+    )
   ));
 };
 export {

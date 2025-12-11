@@ -24,6 +24,12 @@ export const DemoObjectEdit = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
+                    label="Tiptap Content"
+                    name={["TiptapValue"]}
+                >
+                    <TiptapEditor />
+                </Form.Item>
+                <Form.Item
                     label="String Value"
                     name={["StringValue"]}
                 >
@@ -65,12 +71,6 @@ export const DemoObjectEdit = () => {
                     name={["LongStringValue"]}
                 >
                     <Input.TextArea rows={4} />
-                </Form.Item>
-                <Form.Item
-                    label="Tiptap Content"
-                    name={["TiptapValue"]}
-                >
-                    <TiptapEditor />
                 </Form.Item>
                 <Form.Item
                     label="Boolean Value"

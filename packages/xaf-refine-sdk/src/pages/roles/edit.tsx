@@ -7,43 +7,20 @@ import { SecurityPermissionPolicy, IPermissionPolicyTypePermissionObject } from 
 import { TypePermissionList } from "./TypePermissionList";
 
 export const RoleEdit: React.FC<IResourceComponentsProps> = () => {
-    const [form] = Form.useForm();
-    const { formProps, saveButtonProps } = useForm({
-        meta: {
-            expand: [
-                { field: "TypePermissions" }
-            ]
-        }
-    });
+    const { formProps, saveButtonProps, id } = useForm();
 
     const handleSave = () => {
-        form.submit();
+        formProps.form?.submit();
     };
-
-    React.useEffect(() => {
-        if (formProps.initialValues) {
-            const values = { ...formProps.initialValues };
-
-            // Map TargetTypeFullName from OData to TargetType for the form
-            if (values.TypePermissions) {
-                values.TypePermissions = values.TypePermissions.map((p: IPermissionPolicyTypePermissionObject & { TargetTypeFullName?: string }) => ({
-                    ...p,
-                    TargetType: p.TargetType || p.TargetTypeFullName || ""
-                }));
-            }
-
-            form.setFieldsValue(values);
-        }
-    }, [formProps.initialValues]);
 
     return (
         <Edit saveButtonProps={{ ...saveButtonProps, onClick: handleSave }}>
             <Form
                 {...formProps}
-                form={form}
                 layout="vertical"
                 onFinish={(values) => {
-                    return formProps.onFinish && formProps.onFinish(values);
+                    const { TypePermissions, ...rest } = values as any;
+                    return formProps.onFinish && formProps.onFinish(rest);
                 }}
             >
                 <Form.Item
@@ -73,7 +50,9 @@ export const RoleEdit: React.FC<IResourceComponentsProps> = () => {
                         ]}
                     />
                 </Form.Item>
-                <TypePermissionList />
+                <TypePermissionList
+                    masterId={id?.toString()}
+                />
             </Form>
         </Edit >
     );

@@ -27,6 +27,10 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
                 if ("field" in filter) {
                     const { field, operator, value } = filter;
                     if (operator === "eq") {
+                        const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value?.toString());
+                        if (isGuid) {
+                            return `${field} eq ${value}`;
+                        }
                         return `${field} eq '${value}'`;
                     }
                     if (operator === "contains") {
@@ -104,21 +108,7 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
         // Since user asked for XAF integration, the Role/TypePermission structure IS generic to XAF Security System.
         // So we keep it.
 
-        if (resource === "PermissionPolicyRole") {
-            const apiBase = apiUrl.endsWith('/odata') ? apiUrl.substring(0, apiUrl.length - 6) : apiUrl;
 
-            const response = await httpClient(`${apiBase}/Role/UpdateRole`, {
-                method: "POST",
-                body: JSON.stringify({ ...variables, Oid: id }),
-            });
-
-            if (!response) throw new Error("Update failed with no response");
-
-            // Consume body if present but ignore data as we return variables
-            try { await response.json(); } catch { }
-
-            return { data: { ...variables, id } as any };
-        }
 
         const response = await httpClient(`${apiUrl}/${resource}(${id})`, {
             method: "PATCH",

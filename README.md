@@ -2,7 +2,7 @@
 
 Cundi is a modern full-stack application combining a robust .NET backend with a responsive React frontend.
 
-![Dashboard](./web.png)
+![Dashboard](./images/hero.png)
 
 ## Overview
 

@@ -27,10 +27,12 @@ const DetailModal = <TItem extends BaseRecord>({
     const { form } = formProps;
 
     React.useEffect(() => {
-        if (masterId && form) {
-            form.setFieldValue([masterField, "Oid"] as any, masterId);
+        if (modalProps.open && masterId && form) {
+            form.setFieldsValue({
+                [masterField]: { Oid: masterId }
+            } as any);
         }
-    }, [masterId, form, masterField]);
+    }, [masterId, masterField, modalProps.open]); // form is stable, removing from deps to avoid circular ref warning checks
 
     return (
         <Modal
