@@ -2,7 +2,7 @@ import { Show, TextField, NumberField, DateField, BooleanField } from "@refinede
 import { Typography, Image, Table } from "antd";
 import { IDemoObject, IDemoDetail } from "../../interfaces";
 import { useShow } from "@refinedev/core";
-import { SharedDetailList } from "../../components/SharedDetailList";
+import { RelatedList } from "@cundi/xaf-refine-sdk";
 import { DemoDetailFormFields } from "../../components/demo-details/DemoDetailFormFields";
 
 const { Title } = Typography;
@@ -54,7 +54,7 @@ export const DemoObjectShow = () => {
             <div style={{ marginTop: 24, marginBottom: 8 }}>
                 <Title level={4} style={{ margin: 0, marginBottom: 16 }}>Demo Details</Title>
 
-                <SharedDetailList<IDemoDetail>
+                <RelatedList<IDemoDetail>
                     resource="DemoDetail"
                     masterField="Master"
                     masterId={record?.Oid}
@@ -65,7 +65,7 @@ export const DemoObjectShow = () => {
                 >
                     <Table.Column title="Name" dataIndex="Name" />
                     <Table.Column title="Remarks" dataIndex="Remarks" />
-                </SharedDetailList>
+                </RelatedList>
             </div>
         </Show>
     );

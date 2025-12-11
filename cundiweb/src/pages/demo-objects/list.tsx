@@ -7,11 +7,11 @@ import {
 import { Table, Space, Checkbox } from "antd";
 import type { BaseRecord } from "@refinedev/core";
 import { IDemoObject } from "../../interfaces";
-import { SharedList } from "../../components/SharedList";
+import { SmartList } from "@cundi/xaf-refine-sdk";
 
 export const DemoObjectList = () => {
     return (
-        <SharedList<IDemoObject> searchFields={["Name", "StringValue"]}>
+        <SmartList<IDemoObject> searchFields={["Name", "StringValue"]}>
             <Table.Column
                 dataIndex="Name"
                 title="Name"
@@ -74,6 +74,6 @@ export const DemoObjectList = () => {
                     </Space>
                 )}
             />
-        </SharedList>
+        </SmartList>
     );
 };

@@ -1,4 +1,4 @@
-import { LoginPage } from "./pages/login";
+
 import {
   Refine,
   Authenticated,
@@ -30,27 +30,25 @@ import "@ant-design/v5-patch-for-react-19";
 import "@refinedev/antd/dist/reset.css";
 
 import { DashboardPage } from "../src/pages/dashboard";
-import { authProvider, dataProvider } from "@cundi/xaf-refine-sdk";
+import {
+  authProvider,
+  dataProvider,
+  Header,
+  LoginPage,
+  ApplicationUserList,
+  ApplicationUserCreate,
+  ApplicationUserEdit,
+  RoleList,
+  RoleCreate,
+  RoleEdit,
+} from "@cundi/xaf-refine-sdk";
+
 import {
   DemoObjectList,
   DemoObjectCreate,
   DemoObjectEdit,
   DemoObjectShow,
 } from "./pages/demo-objects";
-
-import {
-  ApplicationUserList,
-  ApplicationUserCreate,
-  ApplicationUserEdit,
-} from "./pages/application-users";
-
-import {
-  RoleList,
-  RoleCreate,
-  RoleEdit,
-} from "./pages/roles";
-
-import { Header } from "./components/header";
 import { ColorModeContextProvider, useColorMode } from "./contexts/color-mode";
 
 import { accessControlProvider } from "./accessControlProvider";

@@ -66,14 +66,14 @@ declare const authService: {
 
 declare const Header: React.FC;
 
-interface SharedListProps {
+interface SmartListProps {
     children?: React.ReactNode;
     resource?: string;
     searchFields?: string[];
 }
-declare const SharedList: <T extends BaseRecord = BaseRecord>({ children, resource, searchFields, }: SharedListProps) => React.JSX.Element;
+declare const SmartList: <T extends BaseRecord = BaseRecord>({ children, resource, searchFields, }: SmartListProps) => React.JSX.Element;
 
-interface SharedDetailListProps<TItem extends BaseRecord> {
+interface RelatedListProps<TItem extends BaseRecord> {
     resource: string;
     /** Field name in the detail object that links to master (e.g. "Master") */
     masterField: string;
@@ -84,15 +84,13 @@ interface SharedDetailListProps<TItem extends BaseRecord> {
     /** Callback when data changes (save/delete) to refresh parent */
     onMutationSuccess?: () => void;
     /** Function component to render form fields. Receives 'mode' prop. */
-    FormFields: React.FC<{
-        mode: "create" | "edit";
-    }>;
+    FormFields: any;
     /** Title for the modal, defaults to "Manage Detail" */
     modalTitle?: string;
     /** Extra props for the Table */
     children?: React.ReactNode;
 }
-declare const SharedDetailList: <TItem extends BaseRecord>({ resource, masterField, masterId, dataSource, onMutationSuccess, FormFields, modalTitle, children, }: SharedDetailListProps<TItem>) => React.JSX.Element;
+declare const RelatedList: <TItem extends BaseRecord>({ resource, masterField, masterId, dataSource, onMutationSuccess, FormFields, modalTitle, children, }: RelatedListProps<TItem>) => React.JSX.Element;
 
 interface Base64UploadProps {
     value?: string;
@@ -132,4 +130,4 @@ interface IModelType {
 }
 declare const useModelTypes: () => _tanstack_react_query.UseQueryResult<IModelType[], unknown>;
 
-export { ApplicationUserCreate, ApplicationUserEdit, ApplicationUserList, Base64Upload, ColorModeContext, ColorModeContextProvider, Header, HttpError, type IApplicationUser, type IModelType, type IPermissionPolicyRole, type IPermissionPolicyTypePermissionObject, LoginPage, type RequestOptions, RoleCreate, RoleEdit, RoleList, SecurityPermissionPolicy, SecurityPermissionState, SharedDetailList, SharedList, TOKEN_KEY, authProvider, authService, dataProvider, getBaseUrl, httpClient, parseJwt, useColorMode, useModelTypes };
+export { ApplicationUserCreate, ApplicationUserEdit, ApplicationUserList, Base64Upload, ColorModeContext, ColorModeContextProvider, Header, HttpError, type IApplicationUser, type IModelType, type IPermissionPolicyRole, type IPermissionPolicyTypePermissionObject, LoginPage, RelatedList, type RequestOptions, RoleCreate, RoleEdit, RoleList, SecurityPermissionPolicy, SecurityPermissionState, SmartList, TOKEN_KEY, authProvider, authService, dataProvider, getBaseUrl, httpClient, parseJwt, useColorMode, useModelTypes };

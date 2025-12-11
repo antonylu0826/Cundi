@@ -667,7 +667,7 @@ var Header = () => {
   );
 };
 
-// src/components/SharedList.tsx
+// src/components/SmartList.tsx
 import React4, { useState as useState3, useEffect as useEffect2 } from "react";
 import {
   List,
@@ -675,7 +675,7 @@ import {
 } from "@refinedev/antd";
 import { Table, Form as Form2, Input as Input2, Popover, Checkbox, Button as Button2, Space as Space2 } from "antd";
 import { SettingOutlined, ReloadOutlined } from "@ant-design/icons";
-var SharedList = ({
+var SmartList = ({
   children,
   resource,
   searchFields
@@ -777,7 +777,7 @@ var SharedList = ({
   ))), /* @__PURE__ */ React4.createElement(Space2, null, /* @__PURE__ */ React4.createElement(Button2, { icon: /* @__PURE__ */ React4.createElement(ReloadOutlined, null), onClick: () => (tableQueryResult || queryResult)?.refetch() }, "Refresh"), /* @__PURE__ */ React4.createElement(Popover, { content, title: "Columns", trigger: "click", placement: "bottomRight" }, /* @__PURE__ */ React4.createElement(Button2, { icon: /* @__PURE__ */ React4.createElement(SettingOutlined, null) }, "Columns")))), /* @__PURE__ */ React4.createElement(Table, { ...tableProps, rowKey: "Oid" }, filteredChildren));
 };
 
-// src/components/SharedDetailList.tsx
+// src/components/RelatedList.tsx
 import React5 from "react";
 import { Table as Table2, Button as Button3, Space as Space3, Modal as Modal2, Form as Form3, Input as Input3 } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
@@ -819,7 +819,7 @@ var DetailModal = ({
     ))
   );
 };
-var SharedDetailList = ({
+var RelatedList = ({
   resource,
   masterField,
   masterId,
@@ -1100,7 +1100,7 @@ var ApplicationUserList = () => {
     }
   };
   return /* @__PURE__ */ React7.createElement(React7.Fragment, null, /* @__PURE__ */ React7.createElement(
-    SharedList,
+    SmartList,
     {
       searchFields: ["UserName", "DisplayName", "Email"]
     },
@@ -1429,7 +1429,7 @@ var TypePermissionList = ({ dataSource }) => {
     }
   );
   return /* @__PURE__ */ React11.createElement(
-    SharedDetailList,
+    RelatedList,
     {
       resource: "PermissionPolicyTypePermissions",
       masterField: "Role",
@@ -1606,13 +1606,13 @@ export {
   Header,
   HttpError,
   LoginPage,
+  RelatedList,
   RoleCreate,
   RoleEdit,
   RoleList,
   SecurityPermissionPolicy,
   SecurityPermissionState,
-  SharedDetailList,
-  SharedList,
+  SmartList,
   TOKEN_KEY,
   authProvider,
   authService,

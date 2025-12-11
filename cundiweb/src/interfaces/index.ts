@@ -1,4 +1,4 @@
-export * from "@cundi/xaf-refine-sdk";
+
 
 export interface IDemoObject {
     Oid: string;

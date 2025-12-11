@@ -7,8 +7,8 @@ export * from "./services/authService";
 
 // UI Components
 export * from "./components/Header";
-export * from "./components/SharedList";
-export * from "./components/SharedDetailList";
+export * from "./components/SmartList";
+export * from "./components/RelatedList";
 export * from "./components/Base64Upload";
 
 // Pages

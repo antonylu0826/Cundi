@@ -13,7 +13,7 @@ import {
     Tooltip
 } from "antd";
 import { KeyOutlined, ThunderboltOutlined } from "@ant-design/icons";
-import { SharedList } from "../../components/SharedList";
+import { SmartList } from "../../components/SmartList";
 import { IApplicationUser } from "../../interfaces";
 import { authService } from "../../services/authService";
 
@@ -65,7 +65,7 @@ export const ApplicationUserList: React.FC<IResourceComponentsProps> = () => {
 
     return (
         <>
-            <SharedList<IApplicationUser>
+            <SmartList<IApplicationUser>
                 searchFields={["UserName", "DisplayName", "Email"]}
             >
                 <Table.Column
@@ -122,7 +122,7 @@ export const ApplicationUserList: React.FC<IResourceComponentsProps> = () => {
                         </Space>
                     )}
                 />
-            </SharedList>
+            </SmartList>
 
             <Modal
                 title={`Reset Password for ${selectedUser?.DisplayName || selectedUser?.UserName}`}

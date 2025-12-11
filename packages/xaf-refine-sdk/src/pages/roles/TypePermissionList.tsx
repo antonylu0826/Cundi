@@ -1,6 +1,6 @@
 
 import React from "react";
-import { SharedDetailList } from "../../components/SharedDetailList";
+import { RelatedList } from "../../components/RelatedList";
 import { Form, Select, Table } from "antd";
 import { IPermissionPolicyTypePermissionObject, SecurityPermissionState } from "../../interfaces";
 import { useModelTypes } from "../../hooks/useModelTypes";
@@ -22,7 +22,7 @@ export const TypePermissionList: React.FC<{ dataSource?: IPermissionPolicyTypePe
     );
 
     return (
-        <SharedDetailList<IPermissionPolicyTypePermissionObject>
+        <RelatedList<IPermissionPolicyTypePermissionObject>
             resource="PermissionPolicyTypePermissions"
             masterField="Role"
             dataSource={dataSource} // If provided, or parent handles it
@@ -66,6 +66,6 @@ export const TypePermissionList: React.FC<{ dataSource?: IPermissionPolicyTypePe
             <Table.Column dataIndex="CreateState" title="Create" />
             <Table.Column dataIndex="DeleteState" title="Delete" />
             <Table.Column dataIndex="NavigateState" title="Navigate" />
-        </SharedDetailList>
+        </RelatedList>
     );
 };

@@ -41,13 +41,13 @@ __export(index_exports, {
   Header: () => Header,
   HttpError: () => HttpError,
   LoginPage: () => LoginPage,
+  RelatedList: () => RelatedList,
   RoleCreate: () => RoleCreate,
   RoleEdit: () => RoleEdit,
   RoleList: () => RoleList,
   SecurityPermissionPolicy: () => SecurityPermissionPolicy,
   SecurityPermissionState: () => SecurityPermissionState,
-  SharedDetailList: () => SharedDetailList,
-  SharedList: () => SharedList,
+  SmartList: () => SmartList,
   TOKEN_KEY: () => TOKEN_KEY,
   authProvider: () => authProvider,
   authService: () => authService,
@@ -721,12 +721,12 @@ var Header = () => {
   );
 };
 
-// src/components/SharedList.tsx
+// src/components/SmartList.tsx
 var import_react4 = __toESM(require("react"));
 var import_antd5 = require("@refinedev/antd");
 var import_antd6 = require("antd");
 var import_icons2 = require("@ant-design/icons");
-var SharedList = ({
+var SmartList = ({
   children,
   resource,
   searchFields
@@ -828,7 +828,7 @@ var SharedList = ({
   ))), /* @__PURE__ */ import_react4.default.createElement(import_antd6.Space, null, /* @__PURE__ */ import_react4.default.createElement(import_antd6.Button, { icon: /* @__PURE__ */ import_react4.default.createElement(import_icons2.ReloadOutlined, null), onClick: () => (tableQueryResult || queryResult)?.refetch() }, "Refresh"), /* @__PURE__ */ import_react4.default.createElement(import_antd6.Popover, { content, title: "Columns", trigger: "click", placement: "bottomRight" }, /* @__PURE__ */ import_react4.default.createElement(import_antd6.Button, { icon: /* @__PURE__ */ import_react4.default.createElement(import_icons2.SettingOutlined, null) }, "Columns")))), /* @__PURE__ */ import_react4.default.createElement(import_antd6.Table, { ...tableProps, rowKey: "Oid" }, filteredChildren));
 };
 
-// src/components/SharedDetailList.tsx
+// src/components/RelatedList.tsx
 var import_react5 = __toESM(require("react"));
 var import_antd7 = require("antd");
 var import_icons3 = require("@ant-design/icons");
@@ -870,7 +870,7 @@ var DetailModal = ({
     ))
   );
 };
-var SharedDetailList = ({
+var RelatedList = ({
   resource,
   masterField,
   masterId,
@@ -1142,7 +1142,7 @@ var ApplicationUserList = () => {
     }
   };
   return /* @__PURE__ */ import_react7.default.createElement(import_react7.default.Fragment, null, /* @__PURE__ */ import_react7.default.createElement(
-    SharedList,
+    SmartList,
     {
       searchFields: ["UserName", "DisplayName", "Email"]
     },
@@ -1471,7 +1471,7 @@ var TypePermissionList = ({ dataSource }) => {
     }
   );
   return /* @__PURE__ */ import_react11.default.createElement(
-    SharedDetailList,
+    RelatedList,
     {
       resource: "PermissionPolicyTypePermissions",
       masterField: "Role",
@@ -1649,13 +1649,13 @@ var RoleEdit = () => {
   Header,
   HttpError,
   LoginPage,
+  RelatedList,
   RoleCreate,
   RoleEdit,
   RoleList,
   SecurityPermissionPolicy,
   SecurityPermissionState,
-  SharedDetailList,
-  SharedList,
+  SmartList,
   TOKEN_KEY,
   authProvider,
   authService,

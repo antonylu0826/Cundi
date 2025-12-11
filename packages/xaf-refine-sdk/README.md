@@ -1,64 +1,184 @@
 # @cundi/xaf-refine-sdk
 
-這是一個整合 XAF 後端與 Refine 前端的 SDK，包含了身分驗證 (Auth Provider) 與資料存取 (Data Provider) 的核心邏輯。
+這是一個整合 XAF 後端與 Refine 前端的 SDK，包含了身分驗證 (Auth Provider)、資料存取 (Data Provider) 的核心邏輯，以及完整的 UI 元件庫。
 
-## 專案結構
+## 功能特色
 
-此 SDK 包含：
-- **AuthProvider**: 處理登入、登出、權限檢查。
-- **DataProvider**: 處理 XAF OData 請求。
-- **AuthService**: 封裝了與後端 API 互動的邏輯。
-- **HttpClient**: 統一的 Fetch Wrapper。
+- **Auth Provider**: 處理登入、登出、Token 管理、權限檢查。
+- **Data Provider**: 專為 XAF OData 設計的資料存取層。
+- **UI Components**:
+    - `Header`: 包含使用者選單、主題切換 (Dark/Light Mode) 的應用程式標頭。
+    - `LoginPage`: 標準登入頁面。
+    - `SharedList`, `SharedDetailList`: 高度封裝的通用列表與詳情元件。
+    - `ApplicationUser`: 完整的使用者管理 (列表、新增、編輯、角色分配)。
+    - `PermissionPolicyRole`: 完整的角色與權限管理。
 
-## 如何在專案中使用
+## 如何在新專案中使用
 
-### 1. 安裝 (本地開發模式)
+### 1. 初始化專案
 
-在您的 Refine 專案 (例如 `cundiweb`) 中，執行以下指令來連結此 SDK：
+建議使用官方工具建立標準 Refine + Vite + Ant Design 專案：
 
 ```bash
-# 在 cundiweb 目錄下
+npm create refine-app@latest my-project
+# 選項建議：
+# Backend: Custom JSON REST (稍後會換掉)
+# UI Framework: Ant Design
+# Authentication: None (稍後使用 SDK)
+```
+
+### 2. 安裝 SDK
+
+在您的專案目錄下安裝此 SDK：
+
+```bash
+# 若與 packages 資料夾在同一層級 (monorepo 結構)
 npm install ../packages/xaf-refine-sdk
+
+# 或使用發佈後的套件名稱
+# npm install @cundi/xaf-refine-sdk
 ```
 
-或者，您可以將此 SDK 發佈到私有 NPM Registry 或 GitHub Packages，然後透過標準 `npm install @cundi/xaf-refine-sdk` 安裝。
+### 3. 設定環境變數 (.env)
 
-### 2. 設定 App.tsx
+在專案根目錄建立 `.env` 檔案，指定後端 API 位置。
 
-而在您的 `App.tsx` 中，您可以直接引用並使用它：
+> **注意**：SDK 的 `httpClient` (用於 Auth) 預設讀取 `VITE_API_URL`。而 OData 端點通常需要加上 `/odata` 後綴。
 
-```tsx
-import { authProvider, dataProvider, httpClient } from "@cundi/xaf-refine-sdk";
-
-// 設定 API URL (如果 SDK 內部沒有讀取到環境變數，或需要動態設定)
-// 目前 SDK 預設讀取 import.meta.env.VITE_API_URL
-
-function App() {
-  return (
-    <Refine
-      dataProvider={dataProvider(import.meta.env.VITE_API_URL)}
-      authProvider={authProvider}
-      // ... 其他設定
-    >
-      {/* ... */}
-    </Refine>
-  );
-}
+```env
+VITE_API_URL=https://localhost:7087/api
 ```
 
-### 3. 使用 Hooks 與 Service
+### 4. 設定 App.tsx
+
+將 `src/App.tsx` 修改為引用 SDK 的元件與邏輯：
 
 ```tsx
-import { authService, IApplicationUser } from "@cundi/xaf-refine-sdk";
+import React from "react";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { App as AntdApp, ConfigProvider, theme } from "antd";
+import { Refine, Authenticated } from "@refinedev/core";
+import { ThemedLayout, ErrorComponent, RefineThemes, useNotificationProvider } from "@refinedev/antd";
+import routerProvider, { NavigateToResource, CatchAllNavigate, UnsavedChangesNotifier, DocumentTitleHandler } from "@refinedev/react-router";
+import "@refinedev/antd/dist/reset.css";
 
-// 在 Component 中使用
-const resetPassword = async (userId, password) => {
-  await authService.resetPassword(userId, password);
+// 1. 引入 SDK
+import {
+    authProvider,
+    dataProvider,
+    Header,
+    LoginPage,
+    ApplicationUserList,
+    ApplicationUserCreate,
+    ApplicationUserEdit,
+    RoleList,
+    RoleCreate,
+    RoleEdit,
+    ColorModeContextProvider,
+    useColorMode
+} from "@cundi/xaf-refine-sdk";
+
+// 2. 設定 API URL (Auth 用 raw URL, Data 用 /odata)
+const API_URL = import.meta.env.VITE_API_URL;
+
+const InnerApp: React.FC = () => {
+    const { mode } = useColorMode();
+
+    return (
+        <BrowserRouter>
+            <ConfigProvider
+                theme={{
+                    ...RefineThemes.Blue,
+                    algorithm: mode === "dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,
+                }}
+            >
+                <AntdApp>
+                    <Refine
+                        authProvider={authProvider}
+                        // 3. 設定 Data Provider (注意加上 /odata)
+                        dataProvider={dataProvider(API_URL + "/odata")}
+                        routerProvider={routerProvider}
+                        notificationProvider={useNotificationProvider}
+                        resources={[
+                            {
+                                name: "dashboard",
+                                list: "/",
+                                meta: { label: "Dashboard" }
+                            },
+                            {
+                                name: "ApplicationUser",
+                                list: "/ApplicationUsers",
+                                create: "/ApplicationUsers/create",
+                                edit: "/ApplicationUsers/edit/:id",
+                                meta: { label: "Users" }
+                            },
+                            {
+                                name: "PermissionPolicyRole",
+                                list: "/PermissionPolicyRoles",
+                                create: "/PermissionPolicyRoles/create",
+                                edit: "/PermissionPolicyRoles/edit/:id",
+                                meta: { label: "Roles" }
+                            }
+                        ]}
+                    >
+                        <Routes>
+                            <Route
+                                element={
+                                    <Authenticated key="authenticated-routes" fallback={<CatchAllNavigate to="/login" />}>
+                                        <ThemedLayout Header={Header}>
+                                            <Outlet />
+                                        </ThemedLayout>
+                                    </Authenticated>
+                                }
+                            >
+                                <Route index element={<div>Welcome to Dashboard</div>} />
+                                
+                                {/* 4. 設定 SDK 提供的頁面 */}
+                                <Route path="/ApplicationUsers">
+                                    <Route index element={<ApplicationUserList />} />
+                                    <Route path="create" element={<ApplicationUserCreate />} />
+                                    <Route path="edit/:id" element={<ApplicationUserEdit />} />
+                                </Route>
+
+                                <Route path="/PermissionPolicyRoles">
+                                    <Route index element={<RoleList />} />
+                                    <Route path="create" element={<RoleCreate />} />
+                                    <Route path="edit/:id" element={<RoleEdit />} />
+                                </Route>
+                            </Route>
+
+                            <Route
+                                element={
+                                    <Authenticated key="auth-pages" fallback={<Outlet />}>
+                                        <NavigateToResource resource="dashboard" />
+                                    </Authenticated>
+                                }
+                            >
+                                <Route path="/login" element={<LoginPage />} />
+                            </Route>
+                        </Routes>
+                        <UnsavedChangesNotifier />
+                        <DocumentTitleHandler />
+                    </Refine>
+                </AntdApp>
+            </ConfigProvider>
+        </BrowserRouter>
+    );
 };
+
+const App: React.FC = () => {
+    return (
+        <ColorModeContextProvider>
+            <InnerApp />
+        </ColorModeContextProvider>
+    );
+};
+
+export default App;
 ```
 
 ## 開發與發佈
 
 1. **安裝依賴**: `npm install`
-2. **建置**: `npm run build`
-3. **開發模式**: `npm run dev` (監聽檔案變更)
+2. **建置 SDK**: `npm run build`
+3. **開發模式**: `npm run dev`

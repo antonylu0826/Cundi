@@ -1,33 +1,10 @@
 import { Edit, useForm } from "@refinedev/antd";
+import { Base64Upload } from "@cundi/xaf-refine-sdk";
 import { Form, Input, InputNumber, Select, DatePicker, Upload, Switch } from "antd";
 import { IDemoObject, DemoObjectEnum } from "../../interfaces";
 import dayjs from "dayjs";
 
-const Base64Upload = ({ value, onChange }: { value?: string; onChange?: (value: string) => void }) => {
-    return (
-        <Upload
-            listType="picture-card"
-            maxCount={1}
-            showUploadList={false}
-            beforeUpload={(file) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                    const base64 = reader.result as string;
-                    const rawBase64 = base64.split(",")[1];
-                    onChange?.(rawBase64);
-                };
-                return false;
-            }}
-        >
-            {value ? <img src={`data:image/png;base64,${value}`} alt="avatar" style={{ width: '100%' }} /> : (
-                <div>
-                    <div style={{ marginTop: 8 }}>Upload</div>
-                </div>
-            )}
-        </Upload>
-    );
-};
+
 
 export const DemoObjectEdit = () => {
     const { formProps, saveButtonProps } = useForm<IDemoObject>();
