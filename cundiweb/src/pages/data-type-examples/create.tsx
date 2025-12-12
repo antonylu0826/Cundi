@@ -1,13 +1,11 @@
 import { Create, useForm } from "@refinedev/antd";
-import { Base64Upload, TiptapEditor } from "@cundi/xaf-refine-sdk";
-import { Form, Input, InputNumber, Select, DatePicker, Upload, Switch } from "antd";
-import { IDemoObject, DemoObjectEnum } from "../../interfaces";
+import { Base64Upload } from "@cundi/xaf-refine-sdk";
+import { Form, Input, InputNumber, Select, DatePicker, Switch, TimePicker } from "antd";
+import { IDataTypeExample, ExampleEnum } from "../../interfaces";
 import dayjs from "dayjs";
 
-
-
-export const DemoObjectCreate = () => {
-    const { formProps, saveButtonProps } = useForm<IDemoObject>();
+export const DataTypeExampleCreate = () => {
+    const { formProps, saveButtonProps } = useForm<IDataTypeExample>();
 
     return (
         <Create saveButtonProps={saveButtonProps}>
@@ -24,22 +22,28 @@ export const DemoObjectCreate = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Tiptap Content"
-                    name={["TiptapValue"]}
+                    label="Memo Value (Unlimited)"
+                    name={["MemoValue"]}
                 >
-                    <TiptapEditor />
-                </Form.Item>
-                <Form.Item
-                    label="String Value"
-                    name={["StringValue"]}
-                >
-                    <Input />
+                    <Input.TextArea rows={4} />
                 </Form.Item>
                 <Form.Item
                     label="Int Value"
                     name={["IntValue"]}
                 >
-                    <InputNumber />
+                    <InputNumber style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item
+                    label="Double Value"
+                    name={["DoubleValue"]}
+                >
+                    <InputNumber style={{ width: '100%' }} step={0.01} />
+                </Form.Item>
+                <Form.Item
+                    label="Decimal Value"
+                    name={["DecimalValue"]}
+                >
+                    <InputNumber style={{ width: '100%' }} step={0.01} />
                 </Form.Item>
                 <Form.Item
                     label="Enum Value"
@@ -47,30 +51,11 @@ export const DemoObjectCreate = () => {
                 >
                     <Select
                         options={[
-                            { value: DemoObjectEnum.None, label: "None" },
-                            { value: DemoObjectEnum.Option1, label: "Option1" },
-                            { value: DemoObjectEnum.Option2, label: "Option2" },
-                            { value: DemoObjectEnum.Option3, label: "Option3" },
+                            { value: ExampleEnum.OptionA, label: "OptionA" },
+                            { value: ExampleEnum.OptionB, label: "OptionB" },
+                            { value: ExampleEnum.OptionC, label: "OptionC" },
                         ]}
                     />
-                </Form.Item>
-                <Form.Item
-                    label="Decimal Value"
-                    name={["DecimalValue"]}
-                >
-                    <InputNumber step={0.01} />
-                </Form.Item>
-                <Form.Item
-                    label="Image"
-                    name={["ImageValue"]}
-                >
-                    <Base64Upload />
-                </Form.Item>
-                <Form.Item
-                    label="Long String"
-                    name={["LongStringValue"]}
-                >
-                    <Input.TextArea rows={4} />
                 </Form.Item>
                 <Form.Item
                     label="Boolean Value"
@@ -87,7 +72,19 @@ export const DemoObjectCreate = () => {
                         value: value ? dayjs(value) : undefined,
                     })}
                 >
-                    <DatePicker />
+                    <DatePicker showTime />
+                </Form.Item>
+                <Form.Item
+                    label="TimeSpan Value"
+                    name={["TimeSpanValue"]}
+                >
+                    <Input placeholder="d.hh:mm:ss" />
+                </Form.Item>
+                <Form.Item
+                    label="Image"
+                    name={["ImageValue"]}
+                >
+                    <Base64Upload />
                 </Form.Item>
             </Form>
         </Create>

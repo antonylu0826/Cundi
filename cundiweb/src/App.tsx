@@ -15,6 +15,7 @@ import {
   UserOutlined,
   SettingOutlined,
   TeamOutlined,
+  FunctionOutlined,
 } from "@ant-design/icons";
 
 import routerProvider, {
@@ -44,11 +45,17 @@ import {
 } from "@cundi/xaf-refine-sdk";
 
 import {
-  DemoObjectList,
-  DemoObjectCreate,
-  DemoObjectEdit,
-  DemoObjectShow,
-} from "./pages/demo-objects";
+  DataTypeExampleList,
+  DataTypeExampleCreate,
+  DataTypeExampleEdit,
+  DataTypeExampleShow,
+} from "./pages/data-type-examples";
+import {
+  TiptapExampleList,
+  TiptapExampleCreate,
+  TiptapExampleEdit,
+  TiptapExampleShow,
+} from "./pages/tiptap-examples";
 import { ColorModeContextProvider, useColorMode } from "./contexts/color-mode";
 
 import { accessControlProvider } from "./accessControlProvider";
@@ -82,15 +89,26 @@ const InnerApp: React.FC = () => {
                 },
               },
               {
-                name: "DemoObject",
-                list: "/DemoObjects",
-                create: "/DemoObjects/create",
-                edit: "/DemoObjects/edit/:id",
-                show: "/DemoObjects/show/:id",
+                name: "DataTypeExample",
+                list: "/DataTypeExamples",
+                create: "/DataTypeExamples/create",
+                edit: "/DataTypeExamples/edit/:id",
+                show: "/DataTypeExamples/show/:id",
                 meta: {
-                  label: "Demo Objects",
+                  label: "Data Type Examples",
                   icon: <AppstoreOutlined />,
                 },
+              },
+              {
+                name: "TiptapExample",
+                list: "/TiptapExamples",
+                create: "/TiptapExamples/create",
+                edit: "/TiptapExamples/edit/:id",
+                show: "/TiptapExamples/show/:id",
+                meta: {
+                  label: "Tiptap Examples",
+                  icon: <FunctionOutlined />
+                }
               },
 
               {
@@ -126,8 +144,8 @@ const InnerApp: React.FC = () => {
               },
 
               {
-                name: "DemoDetail",
-                list: "/DemoDetails",
+                name: "DataTypeExampleDetail",
+                list: "/DataTypeExampleDetails",
                 meta: {
                   hide: true
                 }
@@ -153,11 +171,18 @@ const InnerApp: React.FC = () => {
                 }
               >
                 <Route index element={<DashboardPage />} />
-                <Route path="/DemoObjects">
-                  <Route index element={<DemoObjectList />} />
-                  <Route path="create" element={<DemoObjectCreate />} />
-                  <Route path="edit/:id" element={<DemoObjectEdit />} />
-                  <Route path="show/:id" element={<DemoObjectShow />} />
+                <Route path="/DataTypeExamples">
+                  <Route index element={<DataTypeExampleList />} />
+                  <Route path="create" element={<DataTypeExampleCreate />} />
+                  <Route path="edit/:id" element={<DataTypeExampleEdit />} />
+                  <Route path="show/:id" element={<DataTypeExampleShow />} />
+                </Route>
+
+                <Route path="/TiptapExamples">
+                  <Route index element={<TiptapExampleList />} />
+                  <Route path="create" element={<TiptapExampleCreate />} />
+                  <Route path="edit/:id" element={<TiptapExampleEdit />} />
+                  <Route path="show/:id" element={<TiptapExampleShow />} />
                 </Route>
 
                 <Route path="/ApplicationUsers">

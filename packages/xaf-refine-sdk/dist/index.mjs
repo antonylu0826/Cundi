@@ -19140,7 +19140,7 @@ var TypePermissionFormFields = ({ typeOptions }) => {
         filterOption: (input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
       }
     )
-  ), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Read State", name: "ReadState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Write State", name: "WriteState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Create State", name: "CreateState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Delete State", name: "DeleteState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Navigate State", name: "NavigateState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)));
+  ), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Read State", name: "ReadState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Write State", name: "WriteState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Create State", name: "CreateState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)), /* @__PURE__ */ React12.createElement(Form8.Item, { label: "Delete State", name: "DeleteState" }, /* @__PURE__ */ React12.createElement(PermissionSelect, null)));
 };
 var TypePermissionList = ({ masterId }) => {
   const { data: modelTypes } = useModelTypes();
@@ -19192,8 +19192,7 @@ var TypePermissionList = ({ masterId }) => {
     /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "ReadState", title: "Read" }),
     /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "WriteState", title: "Write" }),
     /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "CreateState", title: "Create" }),
-    /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "DeleteState", title: "Delete" }),
-    /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "NavigateState", title: "Navigate" })
+    /* @__PURE__ */ React12.createElement(Table6.Column, { dataIndex: "DeleteState", title: "Delete" })
   );
 };
 

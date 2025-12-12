@@ -59,8 +59,11 @@ public class Startup
                 options.BusinessObject<ApplicationUser>();
                 options.BusinessObject<PermissionPolicyRole>();
                 options.BusinessObject<PermissionPolicyTypePermissionObject>();
-                options.BusinessObject<DemoObject>();
-                options.BusinessObject<DemoDetail>();
+
+
+                options.BusinessObject<DataTypeExample>();
+                options.BusinessObject<DataTypeExampleDetail>();
+                options.BusinessObject<TiptapExample>();
 
             });
 

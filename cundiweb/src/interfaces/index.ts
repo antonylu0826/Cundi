@@ -1,31 +1,35 @@
 
 
-export interface IDemoObject {
+export interface IDataTypeExample {
     Oid: string;
     Name: string;
-    StringValue: string;
+    MemoValue?: string;
     IntValue: number;
-    EnumValue: DemoObjectEnum;
-    DateTimeValue?: string;
+    DoubleValue: number;
     DecimalValue: number;
-    ImageValue: string;
-    LongStringValue?: string;
+    DateTimeValue?: string;
+    TimeSpanValue?: string;
     BoolValue: boolean;
-    TiptapValue?: string;
-    DemoDetails?: IDemoDetail[];
+    EnumValue: ExampleEnum;
+    ImageValue?: string; // Byte array is often serialized to base64 string
+    Details?: IDataTypeExampleDetail[];
 }
 
-export interface IDemoDetail {
+export interface IDataTypeExampleDetail {
+    Oid: string;
+    DetailName: string;
+    Master?: IDataTypeExample;
+}
+
+export enum ExampleEnum {
+    OptionA = "OptionA",
+    OptionB = "OptionB",
+    OptionC = "OptionC",
+}
+
+
+export interface ITiptapExample {
     Oid: string;
     Name: string;
-    Remarks?: string;
-    Master?: IDemoObject;
+    Content?: string;
 }
-
-export enum DemoObjectEnum {
-    None = "None",
-    Option1 = "Option1",
-    Option2 = "Option2",
-    Option3 = "Option3",
-}
-

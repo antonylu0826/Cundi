@@ -78,7 +78,7 @@ Crucial Step: New business objects must be explicitly registered to be exposed v
 ```csharp
 builder.ConfigureOptions(options =>
 {
-    options.BusinessObject<DemoObject>();
+    options.BusinessObject<DataTypeExample>();
     // options.BusinessObject<YourObject>();
 });
 ```
@@ -128,7 +128,7 @@ This ensures all namespaces (`CundiApi` -> `MyStoreApi`) and project references 
 Update the TypeScript interface to match the backend property.
 
 ```typescript
-export interface IDemoObject {
+export interface IDataTypeExample {
     Oid: string;
     Name: string;
     StringValue?: string;
@@ -246,7 +246,7 @@ This section documents the reusable components provided by `@cundi/xaf-refine-sd
 **Props**
 | Prop | Type | Description |
 |---|---|---|
-| `resource` | `string` | The resource name (e.g., "demo_objects"). Used for `localStorage` persistence. |
+| `resource` | `string` | The resource name (e.g., "DataTypeExamples"). Used for `localStorage` persistence. |
 | `searchFields` | `string[]` | Array of field names to search against. |
 | `children` | `ReactNode` | `Table.Column` definitions. |
 
@@ -311,6 +311,31 @@ import { RelatedList } from "@cundi/xaf-refine-sdk";
 -   **Stable UI**: Modals are optimized to prevent freeze bugs.
 -   **Late Binding**: Handles async `masterId` loading.
 -   **Automation Ready**: Supports `data-testid`.
+
+<a id="tiptapeditor"></a>
+### 3. TiptapEditor (Rich Text)
+
+`TiptapEditor` is a feature-rich WYSIWYG editor wrapper around Tiptap.
+
+#### Features
+-   **Formatting**: Bold, Italic, Strike, Highlight, Colors.
+-   **Structure**: Bullet/Ordered Lists, Task Lists, Code Blocks.
+-   **Media**: Image (Base64), YouTube, Tables.
+-   **Math**: LaTeX support.
+
+#### Usage
+
+```tsx
+import { TiptapEditor } from "@cundi/xaf-refine-sdk";
+
+// In a Form
+<Form.Item label="Content" name="Content" trigger="onChange" getValueFromEvent={(value) => value}>
+    <TiptapEditor />
+</Form.Item>
+
+// Read-only Mode (e.g., Show Page)
+<TiptapEditor value={record?.Content} disabled={true} />
+```
 
 ---
 

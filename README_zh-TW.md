@@ -92,7 +92,7 @@ npm run dev
 
 ## 主要功能
 
--   **DemoObject CRUD**: 一個功能完整的範例資源，展示了建立 (Create)、讀取 (Read)、更新 (Update) 與刪除 (Delete) 操作。
+-   **DataTypeExample**: 一個綜合範例，展示了各種 XPO 資料型別 (字串、整數、列舉、圖片、檔案) 及其對應的前端編輯器。
 -   **使用者管理與角色指派**:
     -   管理員可管理使用者 (Application Users) 與角色 (Roles)。
     -   支援在使用者編輯頁面直接指派多個角色 (Roles)。

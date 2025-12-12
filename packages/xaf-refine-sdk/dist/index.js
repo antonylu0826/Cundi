@@ -19161,7 +19161,7 @@ var TypePermissionFormFields = ({ typeOptions }) => {
         filterOption: (input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
       }
     )
-  ), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Read State", name: "ReadState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Write State", name: "WriteState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Create State", name: "CreateState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Delete State", name: "DeleteState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Navigate State", name: "NavigateState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)));
+  ), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Read State", name: "ReadState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Write State", name: "WriteState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Create State", name: "CreateState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)), /* @__PURE__ */ import_react13.default.createElement(import_antd20.Form.Item, { label: "Delete State", name: "DeleteState" }, /* @__PURE__ */ import_react13.default.createElement(PermissionSelect, null)));
 };
 var TypePermissionList = ({ masterId }) => {
   const { data: modelTypes } = useModelTypes();
@@ -19213,8 +19213,7 @@ var TypePermissionList = ({ masterId }) => {
     /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "ReadState", title: "Read" }),
     /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "WriteState", title: "Write" }),
     /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "CreateState", title: "Create" }),
-    /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "DeleteState", title: "Delete" }),
-    /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "NavigateState", title: "Navigate" })
+    /* @__PURE__ */ import_react13.default.createElement(import_antd20.Table.Column, { dataIndex: "DeleteState", title: "Delete" })
   );
 };
 

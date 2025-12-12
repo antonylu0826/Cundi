@@ -45,9 +45,6 @@ const TypePermissionFormFields = ({ typeOptions }: { typeOptions: { label: strin
             <Form.Item label="Delete State" name="DeleteState">
                 <PermissionSelect />
             </Form.Item>
-            <Form.Item label="Navigate State" name="NavigateState">
-                <PermissionSelect />
-            </Form.Item>
         </>
     );
 };
@@ -109,7 +106,6 @@ export const TypePermissionList: React.FC<{ masterId?: string }> = ({ masterId }
             <Table.Column dataIndex="WriteState" title="Write" />
             <Table.Column dataIndex="CreateState" title="Create" />
             <Table.Column dataIndex="DeleteState" title="Delete" />
-            <Table.Column dataIndex="NavigateState" title="Navigate" />
         </RelatedList>
     );
 };

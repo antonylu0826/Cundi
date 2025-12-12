@@ -1,18 +1,18 @@
 import { Show, TextField, NumberField, DateField, BooleanField } from "@refinedev/antd";
 import { Typography, Image, Table } from "antd";
-import { IDemoObject, IDemoDetail } from "../../interfaces";
+import { IDataTypeExample, IDataTypeExampleDetail } from "../../interfaces";
 import { useShow } from "@refinedev/core";
 import { RelatedList } from "@cundi/xaf-refine-sdk";
 import { DemoDetailFormFields } from "../../components/demo-details/DemoDetailFormFields";
 
 const { Title } = Typography;
 
-export const DemoObjectShow = () => {
-    const { query } = useShow<IDemoObject>({
+export const DataTypeExampleShow = () => {
+    const { query } = useShow<IDataTypeExample>({
         meta: {
             expand: [
                 {
-                    field: "DemoDetails",
+                    field: "Details",
                 }
             ]
         }
@@ -26,20 +26,29 @@ export const DemoObjectShow = () => {
             <Title level={5}>Name</Title>
             <TextField value={record?.Name} />
 
-            <Title level={5}>String Value</Title>
-            <TextField value={record?.StringValue} />
+            <Title level={5}>Memo Value</Title>
+            <TextField value={record?.MemoValue} />
 
             <Title level={5}>Int Value</Title>
             <NumberField value={record?.IntValue ?? ""} />
 
+            <Title level={5}>Double Value</Title>
+            <NumberField value={record?.DoubleValue ?? ""} />
+
             <Title level={5}>Decimal Value</Title>
             <NumberField value={record?.DecimalValue ?? ""} />
+
+            <Title level={5}>Enum Value</Title>
+            <TextField value={record?.EnumValue} />
 
             <Title level={5}>Boolean Value</Title>
             <BooleanField value={record?.BoolValue} />
 
             <Title level={5}>Date Time</Title>
-            <DateField value={record?.DateTimeValue} format="YYYY-MM-DD" />
+            <DateField value={record?.DateTimeValue} format="YYYY-MM-DD HH:mm:ss" />
+
+            <Title level={5}>TimeSpan</Title>
+            <TextField value={record?.TimeSpanValue} />
 
             <Title level={5}>Image</Title>
             {record?.ImageValue ? (
@@ -48,26 +57,19 @@ export const DemoObjectShow = () => {
                 <TextField value="-" />
             )}
 
-            <Title level={5}>Long String</Title>
-            <TextField value={record?.LongStringValue} />
-
-            <Title level={5}>Tiptap Content</Title>
-            <div dangerouslySetInnerHTML={{ __html: record?.TiptapValue ?? "" }} />
-
             <div style={{ marginTop: 24, marginBottom: 8 }}>
-                <Title level={4} style={{ margin: 0, marginBottom: 16 }}>Demo Details</Title>
+                <Title level={4} style={{ margin: 0, marginBottom: 16 }}>Details</Title>
 
-                <RelatedList<IDemoDetail>
-                    resource="DemoDetail"
+                <RelatedList<IDataTypeExampleDetail>
+                    resource="DataTypeExampleDetail"
                     masterField="Master"
                     masterId={record?.Oid}
-                    dataSource={record?.DemoDetails}
+                    dataSource={record?.Details}
                     onMutationSuccess={() => query.refetch()}
                     FormFields={DemoDetailFormFields}
-                    modalTitle="Manage Demo Detail"
+                    modalTitle="Manage Detail"
                 >
-                    <Table.Column title="Name" dataIndex="Name" />
-                    <Table.Column title="Remarks" dataIndex="Remarks" />
+                    <Table.Column title="Detail Name" dataIndex="DetailName" />
                 </RelatedList>
             </div>
         </Show>

@@ -92,7 +92,7 @@ The application will launch at `http://localhost:5173`.
 
 ## Key Features
 
--   **DemoObject CRUD**: A fully functional example resource demonstrating Create, Read, Update, and Delete operations.
+-   **DataTypeExample**: A comprehensive example showcasing various XPO data types (Strings, Ints, Enums, Images, Files) and their corresponding frontend editors.
 -   **User Management & Role Assignment**:
     -   Administrators can manage Application Users and Roles.
     -   Support for assigning multiple Roles directly from the User Edit page.
