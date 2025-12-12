@@ -7,15 +7,12 @@ public class DemoObject : BaseObject
 {
     public DemoObject(Session session) : base(session) { }
 
-
-
     private string _Name;
     public string Name
     {
         get { return _Name; }
         set { SetPropertyValue<string>(nameof(Name), ref _Name, value); }
     }
-
 
     private string _StringValue;
     public string StringValue
@@ -37,7 +34,6 @@ public class DemoObject : BaseObject
         get { return _EnumValue; }
         set { SetPropertyValue<DemoObjectEnum>(nameof(EnumValue), ref _EnumValue, value); }
     }
-
 
     private DateTime? _DateTimeValue;
     public DateTime? DateTimeValue
@@ -69,14 +65,7 @@ public class DemoObject : BaseObject
         set { SetPropertyValue<string>(nameof(LongStringValue), ref _LongStringValue, value); }
     }
 
-    private bool _BoolValue;
-    public bool BoolValue
-    {
-        get { return _BoolValue; }
-        set { SetPropertyValue<bool>(nameof(BoolValue), ref _BoolValue, value); }
-    }
-
-    [Association("DemoObject-DemoDetails"), Aggregated]
+    [Association, Aggregated]
     public XPCollection<DemoDetail> DemoDetails
     {
         get { return GetCollection<DemoDetail>(nameof(DemoDetails)); }
@@ -111,7 +100,7 @@ public class DemoDetail : BaseObject
     }
 
     private DemoObject _Master;
-    [Association("DemoObject-DemoDetails")]
+    [Association]
     public DemoObject Master
     {
         get { return _Master; }
