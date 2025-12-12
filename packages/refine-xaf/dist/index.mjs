@@ -275,6 +275,63 @@ var authProvider = {
   }
 };
 
+// src/utils/generateFilter.ts
+var mapOperator = (operator) => {
+  switch (operator) {
+    case "eq":
+      return "eq";
+    case "ne":
+      return "ne";
+    case "lt":
+      return "lt";
+    case "gt":
+      return "gt";
+    case "lte":
+      return "le";
+    case "gte":
+      return "ge";
+    case "in":
+      return "in";
+    // OData v4.01 usually, or handled manually
+    case "contains":
+      return "contains";
+    case "startswith":
+      return "startswith";
+    case "endswith":
+      return "endswith";
+  }
+  return "eq";
+};
+var generateFilterString = (filters) => {
+  if (!filters || filters.length === 0) return "";
+  return filters.map((filter) => parseFilter(filter)).filter((f) => f).join(" and ");
+};
+var parseFilter = (filter) => {
+  if ("field" in filter) {
+    const { field, operator, value } = filter;
+    if (value === void 0 || value === null) return "";
+    const mappedOp = mapOperator(operator);
+    const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value?.toString());
+    const safeValue = typeof value === "string" && !isGuid ? `'${value}'` : value;
+    if (mappedOp === "contains" || mappedOp === "startswith" || mappedOp === "endswith") {
+      return `${mappedOp}(${field}, '${value}')`;
+    }
+    if (operator === "in" && Array.isArray(value)) {
+      return `(${value.map((v) => {
+        const isGuidV = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v?.toString());
+        const val = typeof v === "string" && !isGuidV ? `'${v}'` : v;
+        return `${field} eq ${val}`;
+      }).join(" or ")})`;
+    }
+    return `${field} ${mappedOp} ${safeValue}`;
+  } else {
+    const { operator, value } = filter;
+    if (!Array.isArray(value)) return "";
+    const nested = value.map((f) => parseFilter(f)).filter((f) => f);
+    return `(${nested.join(` ${operator} `)})`;
+  }
+};
+
 // src/dataProvider.ts
 var dataProvider = (apiUrl) => ({
   getList: async ({ resource, pagination, sorters, filters }) => {
@@ -290,37 +347,9 @@ var dataProvider = (apiUrl) => ({
       const sort = sorters.map((s) => `${s.field} ${s.order}`).join(",");
       url.searchParams.append("$orderby", sort);
     }
-    if (filters && filters.length > 0) {
-      const filterStrings = filters.map((filter) => {
-        if ("field" in filter) {
-          const { field, operator, value } = filter;
-          if (operator === "eq") {
-            const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value?.toString());
-            if (isGuid) {
-              return `${field} eq ${value}`;
-            }
-            return `${field} eq '${value}'`;
-          }
-          if (operator === "contains") {
-            return `contains(${field}, '${value}')`;
-          }
-          if (operator === "startswith") {
-            return `startswith(${field}, '${value}')`;
-          }
-          if (operator === "endswith") {
-            return `endswith(${field}, '${value}')`;
-          }
-        } else {
-          const { operator, value } = filter;
-          if (operator === "or") {
-            return `(${value.map((f) => `contains(${f.field}, '${f.value}')`).join(" or ")})`;
-          }
-        }
-        return "";
-      }).filter((f) => f);
-      if (filterStrings.length > 0) {
-        url.searchParams.append("$filter", filterStrings.join(" and "));
-      }
+    const filterString = generateFilterString(filters);
+    if (filterString) {
+      url.searchParams.append("$filter", filterString);
     }
     url.searchParams.append("$count", "true");
     const response = await httpClient(url.toString());
@@ -373,8 +402,21 @@ var dataProvider = (apiUrl) => ({
     return { data: { id } };
   },
   getApiUrl: () => apiUrl,
-  getMany: async () => {
-    throw new Error("Not implemented");
+  getMany: async ({ resource, ids }) => {
+    const url = new URL(`${apiUrl}/${resource}`);
+    const filter = ids.map((id) => {
+      const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id.toString());
+      return `Oid eq ${isGuid ? id : `'${id}'`}`;
+    }).join(" or ");
+    url.searchParams.append("$filter", filter);
+    const response = await httpClient(url.toString());
+    if (!response) {
+      return { data: [] };
+    }
+    const data = await response.json();
+    return {
+      data: data.value.map((item) => ({ ...item, id: item.Oid }))
+    };
   },
   createMany: async () => {
     throw new Error("Not implemented");
@@ -385,8 +427,38 @@ var dataProvider = (apiUrl) => ({
   updateMany: async () => {
     throw new Error("Not implemented");
   },
-  custom: async () => {
-    throw new Error("Not implemented");
+  custom: async ({ url, method, filters, sorters, payload, query, headers }) => {
+    let requestUrl = new URL(`${url.startsWith("http") ? url : `${apiUrl}${url}`}`);
+    if (filters) {
+      const filterString = generateFilterString(filters);
+      if (filterString) {
+        requestUrl.searchParams.append("$filter", filterString);
+      }
+    }
+    if (sorters && sorters.length > 0) {
+      const sort = sorters.map((s) => `${s.field} ${s.order}`).join(",");
+      requestUrl.searchParams.append("$orderby", sort);
+    }
+    if (query) {
+      Object.keys(query).forEach((key) => {
+        requestUrl.searchParams.append(key, query[key]);
+      });
+    }
+    const response = await httpClient(requestUrl.toString(), {
+      method,
+      headers,
+      body: payload ? JSON.stringify(payload) : void 0
+    });
+    if (!response) {
+      return { data: {} };
+    }
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
+    return { data };
   }
 });
 

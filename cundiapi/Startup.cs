@@ -27,6 +27,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddScoped<IAuthenticationTokenProvider, JwtTokenProviderService>();
+        services.AddHealthChecks();
 
         services.AddCors(options =>
         {
@@ -223,6 +224,7 @@ public class Startup
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseAntiforgery();
+        app.UseHealthChecks("/health");
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
