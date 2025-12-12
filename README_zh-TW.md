@@ -37,6 +37,28 @@ Cundi 是一個結合了強大 .NET 後端與響應式 React 前端的現代化�
     -   **RelatedList**: 專為 Master-Detail (主從) 關係設計的元件 (via SDK)。
     -   以角色為基礎的存取控制 (RBAC)。
 
+## 使用範本 (cundiapi)
+
+您可以使用內建的 `dotnet new` 範本快速建立新的後端專案。
+
+### 安裝範本
+
+若要從原始碼安裝範本，請在根目錄執行以下指令：
+
+```bash
+dotnet new install ./cundiapi
+```
+
+### 建立新後端專案
+
+安裝完成後，使用以下指令建立新專案：
+
+```bash
+dotnet new cundiapi -n 您的專案名稱
+```
+
+這將會建立一個名為 `您的專案名稱` 的新資料夾，並將所有命名空間與檔案名稱自動重新命名。
+
 ## 快速開始
 
 ### 前置需求

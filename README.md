@@ -37,6 +37,28 @@ This project demonstrates a Headless CMS architecture using **DevExpress XAF** f
     -   **RelatedList**: Specialized component for Master-Detail relationships (via SDK).
     -   Role-based Access Control (RBAC).
 
+## Using the Template (cundiapi)
+
+You can easily generate a new backend project using the included `dotnew new` template.
+
+### Installing the Template
+
+To install the template from the source, run the following command in the root directory:
+
+```bash
+dotnet new install ./cundiapi
+```
+
+### Creating a New Backend Project
+
+Once installed, you can create a new project using:
+
+```bash
+dotnet new cundiapi -n YourProjectName
+```
+
+This will create a new folder named `YourProjectName` with all namespaces and files renamed accordingly.
+
 ## Getting Started
 
 ### Prerequisites

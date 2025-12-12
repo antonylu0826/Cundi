@@ -1,0 +1,39 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Cundi",
+    "classifications": [
+        "Web",
+        "WebAPI"
+    ],
+    "identity": "Cundi.Api.Template",
+    "name": "Cundi WebAPI Template",
+    "shortName": "cundiapi",
+    "tags": {
+        "language": "C#",
+        "type": "project"
+    },
+    "sourceName": "CundiApi",
+    "preferNameDirectory": true,
+    "sources": [
+        {
+            "modifiers": [
+                {
+                    "exclude": [
+                        ".template.config/**",
+                        "bin/**",
+                        "obj/**",
+                        ".vs/**",
+                        "*.user",
+                        "*.lock.json",
+                        "*.lock.json"
+                    ]
+                },
+                {
+                    "include": [
+                        "nuget-packages/**"
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -89,6 +89,26 @@ builder.ConfigureOptions(options =>
 
 ---
 
+## Part 1.5: Using Project Template
+
+For creating new backend projects quickly, use the `cundiapi` template.
+
+### Setup
+Run this once to install the template:
+```bash
+dotnet new install ./cundiapi
+```
+
+### Usage
+Create a new project (e.g., `MyStoreApi`):
+```bash
+dotnet new cundiapi -n MyStoreApi
+```
+
+This ensures all namespaces (`CundiApi` -> `MyStoreApi`) and project references are correctly renamed.
+
+---
+
 ## Part 2: Frontend Development (`cundiweb`)
 
 ### 1. Login & Authentication
