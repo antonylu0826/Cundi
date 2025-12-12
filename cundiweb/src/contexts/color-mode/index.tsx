@@ -1,3 +1,3 @@
 
-import { ColorModeContextProvider, useColorMode } from "@cundi/xaf-refine-sdk";
+import { ColorModeContextProvider, useColorMode } from "@cundi/refine-xaf";
 export { ColorModeContextProvider, useColorMode };

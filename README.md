@@ -30,7 +30,7 @@ This project demonstrates a Headless CMS architecture using **DevExpress XAF** f
 -   **Build Tool**: Vite
 -   **Metasystem**: [Refine](https://refine.dev/)
 -   **UI Library**: Ant Design
--   **Core SDK**: `@cundi/xaf-refine-sdk`
+-   **Core SDK**: `@cundi/refine-xaf`
 -   **Features**:
     -   **SmartList**: A powerful, reusable list component with built-in search, sorting, and column management (via SDK).
         ![SmartList](./assets/SmartList.png)

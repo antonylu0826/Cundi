@@ -24,7 +24,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
-    "@cundi/xaf-refine-sdk": "file:../packages/xaf-refine-sdk",
+    "@cundi/refine-xaf": "file:../packages/refine-xaf",
     "@refinedev/antd": "^6.0.3",
     "@refinedev/cli": "^2.16.50",
     "@refinedev/core": "^5.0.6",

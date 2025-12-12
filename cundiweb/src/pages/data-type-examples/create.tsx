@@ -1,5 +1,5 @@
 import { Create, useForm } from "@refinedev/antd";
-import { Base64Upload } from "@cundi/xaf-refine-sdk";
+import { Base64Upload } from "@cundi/refine-xaf";
 import { Form, Input, InputNumber, Select, DatePicker, Switch, TimePicker } from "antd";
 import { IDataTypeExample, ExampleEnum } from "../../interfaces";
 import dayjs from "dayjs";

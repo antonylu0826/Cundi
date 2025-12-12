@@ -144,7 +144,7 @@ export interface IDataTypeExample {
 Create `list.tsx`, `create.tsx`, and `edit.tsx`.
 
 **1. List View (`list.tsx`)**
-Use **[SmartList](#smartlist)** (from `@cundi/xaf-refine-sdk`) for standard functionality. Define columns using `Table.Column`.
+Use **[SmartList](#smartlist)** (from `@cundi/refine-xaf`) for standard functionality. Define columns using `Table.Column`.
 
 *Examples:*
 
@@ -226,7 +226,7 @@ Use standard Ant Design form components.
 
 ## Part 3: SDK Component Usage
 
-This section documents the reusable components provided by `@cundi/xaf-refine-sdk`.
+This section documents the reusable components provided by `@cundi/refine-xaf`.
 
 <a id="smartlist"></a>
 ### 1. SmartList (Main Lists)
@@ -252,7 +252,7 @@ This section documents the reusable components provided by `@cundi/xaf-refine-sd
 
 **Example**
 ```tsx
-import { SmartList } from "@cundi/xaf-refine-sdk";
+import { SmartList } from "@cundi/refine-xaf";
 
 <SmartList resource="my_resource" searchFields={["Name", "Description"]}>
     {/* Action Column: Always visible */}
@@ -292,7 +292,7 @@ export const YourDetailFormFields: React.FC<{ mode: "create" | "edit" }> = ({ mo
 
 **2. Implementation in Parent Page**
 ```tsx
-import { RelatedList } from "@cundi/xaf-refine-sdk";
+import { RelatedList } from "@cundi/refine-xaf";
 
 <RelatedList<IYourDetailInterface>
     resource="YourDetailResource"   // The resource name in Refine
@@ -326,7 +326,7 @@ import { RelatedList } from "@cundi/xaf-refine-sdk";
 #### Usage
 
 ```tsx
-import { TiptapEditor } from "@cundi/xaf-refine-sdk";
+import { TiptapEditor } from "@cundi/refine-xaf";
 
 // In a Form
 <Form.Item label="Content" name="Content" trigger="onChange" getValueFromEvent={(value) => value}>
@@ -341,7 +341,7 @@ import { TiptapEditor } from "@cundi/xaf-refine-sdk";
 
 ## Part 4: Backend Support for SDK Features
 
-The `@cundi/xaf-refine-sdk` handles the complex UI logic for User and Role management, but it relies on specific custom endpoints in the backend to handle OData limitations regarding many-to-many relationships and nested permissions.
+The `@cundi/refine-xaf` handles the complex UI logic for User and Role management, but it relies on specific custom endpoints in the backend to handle OData limitations regarding many-to-many relationships and nested permissions.
 
 ### 1. User Role Assignment (`UserController.cs`)
 

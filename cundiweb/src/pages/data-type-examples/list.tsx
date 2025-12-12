@@ -8,7 +8,7 @@ import {
 import { Table, Space, Checkbox } from "antd";
 import type { BaseRecord } from "@refinedev/core";
 import { IDataTypeExample } from "../../interfaces";
-import { SmartList } from "@cundi/xaf-refine-sdk";
+import { SmartList } from "@cundi/refine-xaf";
 
 export const DataTypeExampleList = () => {
     return (

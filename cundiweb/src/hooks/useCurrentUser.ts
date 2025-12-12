@@ -1,5 +1,5 @@
 import { useGetIdentity } from "@refinedev/core";
-import { IApplicationUser } from "@cundi/xaf-refine-sdk";
+import { IApplicationUser } from "@cundi/refine-xaf";
 
 export interface ICurrentUser extends IApplicationUser {
     id: string; // Refine expects 'id'

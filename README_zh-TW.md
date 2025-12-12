@@ -30,7 +30,7 @@ Cundi 是一個結合了強大 .NET 後端與響應式 React 前端的現代化�
 -   **建置工具**: Vite
 -   **中台框架**: [Refine](https://refine.dev/)
 -   **UI 函式庫**: Ant Design
--   **核心 SDK**: `@cundi/xaf-refine-sdk`
+-   **核心 SDK**: `@cundi/refine-xaf`
 -   **功能**:
     -   **SmartList**: 強大且可重複使用的列表元件，內建搜尋、排序與欄位管理功能 (via SDK)。
         ![SmartList](./assets/SmartList.png)

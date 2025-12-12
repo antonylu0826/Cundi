@@ -2,7 +2,7 @@
 import { Edit, useForm, Create } from "@refinedev/antd";
 import { Form, Input } from "antd";
 import { ITiptapExample } from "../../interfaces";
-import { TiptapEditor } from "@cundi/xaf-refine-sdk";
+import { TiptapEditor } from "@cundi/refine-xaf";
 
 export const TiptapExampleEdit = () => {
     const { formProps, saveButtonProps } = useForm<ITiptapExample>();

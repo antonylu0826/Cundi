@@ -3,7 +3,7 @@ import { useShow } from "@refinedev/core";
 import { Show } from "@refinedev/antd";
 import { Typography } from "antd";
 import { ITiptapExample } from "../../interfaces";
-import { TiptapEditor } from "@cundi/xaf-refine-sdk";
+import { TiptapEditor } from "@cundi/refine-xaf";
 
 const { Title } = Typography;
 

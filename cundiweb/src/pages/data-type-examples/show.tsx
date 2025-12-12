@@ -2,7 +2,7 @@ import { Show, TextField, NumberField, DateField, BooleanField } from "@refinede
 import { Typography, Image, Table } from "antd";
 import { IDataTypeExample, IDataTypeExampleDetail } from "../../interfaces";
 import { useShow } from "@refinedev/core";
-import { RelatedList } from "@cundi/xaf-refine-sdk";
+import { RelatedList } from "@cundi/refine-xaf";
 import { DemoDetailFormFields } from "../../components/demo-details/DemoDetailFormFields";
 
 const { Title } = Typography;

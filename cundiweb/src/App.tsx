@@ -42,7 +42,7 @@ import {
   RoleList,
   RoleCreate,
   RoleEdit,
-} from "@cundi/xaf-refine-sdk";
+} from "@cundi/refine-xaf";
 
 import {
   DataTypeExampleList,

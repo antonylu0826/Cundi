@@ -7,7 +7,7 @@ import {
 import { Table, Space } from "antd";
 import type { BaseRecord } from "@refinedev/core";
 import { ITiptapExample } from "../../interfaces";
-import { SmartList } from "@cundi/xaf-refine-sdk";
+import { SmartList } from "@cundi/refine-xaf";
 
 export const TiptapExampleList = () => {
     return (
