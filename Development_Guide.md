@@ -383,3 +383,144 @@ The SDK's permission editor needs to know which Business Objects exist in the sy
 
 **Logic:**
 Returns a list of available XAF Business Object types (names and captions) for the frontend dropdowns.
+
+---
+
+## Appendix: Creating Frontend from Scratch
+
+If you prefer to build the frontend application from scratch instead of using the provided `cundiweb` folder, follow these steps.
+
+### 1. Initialize Refine App
+
+Use the official Refine CLI to scaffold a new project.
+
+```bash
+npm create refine-app@latest cundiweb
+```
+
+**Recommended Options:**
+-   **UI Framework**: Ant Design
+-   **Backend Support**: Custom (since we use our own OData provider via SDK)
+-   **Authentication**: Custom
+-   **Router**: React Router v6
+-   **Package Manager**: npm
+
+### 2. Install Dependencies
+
+Install the Cundi SDK and other strict dependencies.
+
+```bash
+cd cundiweb
+npm install @cundi/refine-xaf
+```
+
+### 3. Configure App.tsx
+
+Replace the contents of `src/App.tsx` to integrate the SDK's providers and components.
+
+```tsx
+import { Refine, Authenticated } from "@refinedev/core";
+import { ThemedLayout, ErrorComponent, RefineThemes } from "@refinedev/antd";
+import { App as AntdApp, ConfigProvider } from "antd";
+import routerProvider, { NavigateToResource, CatchAllNavigate } from "@refinedev/react-router";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router";
+import "@refinedev/antd/dist/reset.css";
+
+// Import Cundi SDK
+import {
+    authProvider,
+    dataProvider,
+    Header,
+    LoginPage,
+    ApplicationUserList,
+    ApplicationUserCreate,
+    ApplicationUserEdit
+} from "@cundi/refine-xaf";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/odata";
+
+const App: React.FC = () => {
+    return (
+        <BrowserRouter>
+            <ConfigProvider theme={RefineThemes.Blue}>
+                <AntdApp>
+                    <Refine
+                        authProvider={authProvider}
+                        dataProvider={dataProvider(API_URL)}
+                        routerProvider={routerProvider}
+                        resources={[
+                            {
+                                name: "dashboard",
+                                list: "/",
+                            },
+                            {
+                                name: "ApplicationUser",
+                                list: "/ApplicationUsers",
+                                create: "/ApplicationUsers/create",
+                                edit: "/ApplicationUsers/edit/:id",
+                                meta: { label: "Users" }
+                            }
+                        ]}
+                    >
+                        <Routes>
+                            <Route
+                                element={
+                                    <Authenticated key="authenticated-routes" fallback={<CatchAllNavigate to="/login" />}>
+                                        <ThemedLayout Header={Header}>
+                                            <Outlet />
+                                        </ThemedLayout>
+                                    </Authenticated>
+                                }
+                            >
+                                <Route index element={<div>Dashboard</div>} />
+                                <Route path="/ApplicationUsers">
+                                    <Route index element={<ApplicationUserList />} />
+                                    <Route path="create" element={<ApplicationUserCreate />} />
+                                    <Route path="edit/:id" element={<ApplicationUserEdit />} />
+                                </Route>
+                            </Route>
+
+                            <Route
+                                element={
+                                    <Authenticated key="auth-pages" fallback={<Outlet />}>
+                                        <NavigateToResource resource="dashboard" />
+                                    </Authenticated>
+                                }
+                            >
+                                <Route path="/login" element={<LoginPage />} />
+                            </Route>
+                        </Routes>
+                    </Refine>
+                </AntdApp>
+            </ConfigProvider>
+        </BrowserRouter>
+    );
+};
+
+export default App;
+```
+
+### 4. Setup Vite Proxy (Optional)
+
+To avoid CORS issues during local development, configure `vite.config.ts`:
+
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/odata': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      }
+    }
+  }
+})
+```
