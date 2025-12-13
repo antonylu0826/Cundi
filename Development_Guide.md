@@ -94,9 +94,9 @@ builder.ConfigureOptions(options =>
 For creating new backend projects quickly, use the `cundiapi` template.
 
 ### Setup
-Run this once to install the template:
+Run this once to install the template from NuGet:
 ```bash
-dotnet new install ./cundiapi
+dotnet new install Cundi.Api.Template
 ```
 
 ### Usage

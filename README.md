@@ -43,10 +43,10 @@ You can easily generate a new backend project using the included `dotnew new` te
 
 ### Installing the Template
 
-To install the template from the source, run the following command in the root directory:
+To install the published template from NuGet, run the following command:
 
 ```bash
-dotnet new install ./cundiapi
+dotnet new install Cundi.Api.Template
 ```
 
 ### Creating a New Backend Project

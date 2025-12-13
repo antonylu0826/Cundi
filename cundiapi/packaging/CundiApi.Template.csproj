@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageVersion>1.0.0</PackageVersion>
+    <PackageId>Cundi.Api.Template</PackageId>
+    <Title>Cundi WebAPI Template</Title>
+    <Authors>Cundi</Authors>
+    <Description>Cundi WebAPI Template for XAF and Refine Integration</Description>
+    <PackageTags>dotnet-new;templates;cundi;xaf;refine</PackageTags>
+    <TargetFramework>netstandard2.0</TargetFramework>
+
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Include everything from parent directory -->
+    <!-- Exclude bin, obj, .vs, .git, and the packaging folder itself -->
+    <Content Include="..\**\*" Exclude="..\**\bin\**;..\**\obj\**;..\**\.vs\**;..\**\.git\**;..\**\*.user;..\**\*.lock.json;..\**\*.nupkg;..\**\_._;..\packaging\**;..\**\node_modules\**" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+</Project>

@@ -7,7 +7,15 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsup",
-        "dev": "tsup --watch"
+        "dev": "tsup --watch",
+        "prepublishOnly": "npm run build"
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "publishConfig": {
+        "access": "public"
     },
     "keywords": [
         "refine",
